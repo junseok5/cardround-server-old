@@ -2,6 +2,7 @@ import Koa from 'koa'
 import KoaBody from 'koa-body'
 import logger from 'morgan'
 import database from './database/database'
+import jwt from './middlewares/jwt'
 import router from './router'
 
 class App {
@@ -25,6 +26,7 @@ class App {
     private middlewares = (): void => {
         this.app.use(logger('dev'))
         this.app.use(KoaBody({ multipart: true }))
+        this.app.use(jwt)
         this.app.use(router.routes()).use(router.allowedMethods())
     }
 }

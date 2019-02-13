@@ -68,9 +68,9 @@ const BoardSchema: Schema = new Schema({
 let BoardModel: Model<IBoard>
 
 try {
-    BoardModel = model('Board', BoardSchema)
+    BoardModel = model<IBoard>('Board', BoardSchema)
 } catch(error) {
-    BoardModel = model('Board')
+    BoardModel = model<IBoard>('Board')
 }
 
 export default BoardModel

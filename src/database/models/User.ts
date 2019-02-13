@@ -44,9 +44,9 @@ const UserSchema: Schema = new Schema({
 let UserModel: Model<IUser>
 
 try {
-    UserModel = model('User', UserSchema)
+    UserModel = model<IUser>('User', UserSchema)
 } catch(error) {
-    UserModel = model('User')
+    UserModel = model<IUser>('User')
 }
 
 export default UserModel
