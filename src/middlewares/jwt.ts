@@ -3,7 +3,7 @@ import { IUser } from "../database/models/User"
 import decodeJWT from "../utils/decodeJWT"
 
 export default async (ctx: Context, next: () => Promise<any>) => {
-    const token = ctx.cookies.get("access_token")
+    const token = ctx.get('X-JWT')
 
     if (!token) {
         ctx.user = null
