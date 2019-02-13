@@ -1,13 +1,8 @@
 import { Document, Model, model, Schema } from "mongoose"
 
-export interface IConent {
-    website: string
-    detail?: string
-}
-
 export interface IMessage extends Document {
     user: Schema.Types.ObjectId
-    content: IConent
+    content: string
     createdAt: Date
 }
 
@@ -17,17 +12,7 @@ const MessageSchema: Schema = new Schema({
         ref: "User",
         required: true
     },
-    content: {
-        website: {
-            type: String,
-            default: "",
-            required: true
-        },
-        detail: {
-            type: String,
-            default: ""
-        }
-    },
+    content: String,
     createdAt: {
         type: Date,
         default: Date.now()
