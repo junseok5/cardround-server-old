@@ -12,4 +12,6 @@ const router: Router = new Router()
     /messages
 */
 
+router.use('/auth', router.routes())
+
 export default router
