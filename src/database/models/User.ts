@@ -1,5 +1,15 @@
 import { Document, model, Model, Schema } from 'mongoose'
 
+export interface IUser extends Document {
+    email: string
+    displayName: string
+    socialId: string
+    accessToken: string
+    thumbnail: string
+    createdAt: Date
+    updatedAt: Date
+}
+
 const UserSchema: Schema = new Schema({
     email: {
         type: String,
@@ -30,16 +40,6 @@ const UserSchema: Schema = new Schema({
         default: Date.now()
     }
 })
-
-export interface IUser extends Document {
-    email: string
-    displayName: string
-    socialId: string
-    accessToken: string
-    thumbnail: string
-    createdAt: Date
-    updatedAt: Date
-}
 
 let UserModel: Model<IUser>
 
