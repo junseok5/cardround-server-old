@@ -1,4 +1,4 @@
-import { Document, Model, model, Schema } from "mongoose"
+import { Document, model, Schema } from "mongoose"
 
 export interface IMessage extends Document {
     user: Schema.Types.ObjectId
@@ -19,7 +19,7 @@ const MessageSchema: Schema = new Schema({
     }
 })
 
-let MessageModel: Model<IMessage>
+let MessageModel
 
 try {
     MessageModel = model<IMessage>("Message", MessageSchema)

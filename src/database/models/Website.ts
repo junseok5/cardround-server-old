@@ -1,4 +1,4 @@
-import { Document, Model, model, Schema } from "mongoose"
+import { Document, model, Schema } from "mongoose"
 
 export interface IWebsite extends Document {
     name: string
@@ -40,7 +40,7 @@ const WebsiteSchema: Schema = new Schema({
     }
 })
 
-let WebsiteModel: Model<IWebsite>
+let WebsiteModel
 
 try {
     WebsiteModel = model<IWebsite>("Website", WebsiteSchema)

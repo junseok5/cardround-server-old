@@ -1,0 +1,7 @@
+# HTTP Status Code
+
+* 200 - success
+* 400 Bad Request - Field validation fail
+* 401 Unauthorized - API 인증, 인가 실패
+* 404 Not found = No resource
+* 500 Internal Server Error - 서버 에러

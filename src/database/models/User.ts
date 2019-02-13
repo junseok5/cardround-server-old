@@ -1,4 +1,4 @@
-import { Document, model, Model, Schema } from 'mongoose'
+import { Document, model, Schema } from 'mongoose'
 
 export interface IUser extends Document {
     email: string
@@ -13,7 +13,8 @@ export interface IUser extends Document {
 const UserSchema: Schema = new Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     displayName: {
         type: String,
@@ -21,7 +22,8 @@ const UserSchema: Schema = new Schema({
     },
     socialId: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     accessToken: {
         type: String,
@@ -41,7 +43,11 @@ const UserSchema: Schema = new Schema({
     }
 })
 
-let UserModel: Model<IUser>
+UserSchema.statics.findSocialId = function({ id }) {
+    return this.findOne({ socialId: id })
+}
+
+let UserModel
 
 try {
     UserModel = model<IUser>('User', UserSchema)

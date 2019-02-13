@@ -1,4 +1,4 @@
-import { Document, Model, model, Schema } from "mongoose";
+import { Document, model, Schema } from "mongoose";
 
 export interface IFollow extends Document {
     user: Schema.Types.ObjectId,
@@ -23,7 +23,7 @@ const FollowSchema: Schema = new Schema({
     }
 })
 
-let FollowModel: Model<IFollow>
+let FollowModel
 
 try {
     FollowModel = model<IFollow>('Follow', FollowSchema)

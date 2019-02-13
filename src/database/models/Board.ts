@@ -1,4 +1,4 @@
-import { Document, Model, model, Schema } from "mongoose"
+import { Document, model, Schema } from "mongoose"
 
 export interface ICard {
     code: string
@@ -62,7 +62,7 @@ const BoardSchema: Schema = new Schema({
     }
 })
 
-let BoardModel: Model<IBoard>
+let BoardModel
 
 try {
     BoardModel = model<IBoard>("Board", BoardSchema)
