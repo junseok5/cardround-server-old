@@ -32,29 +32,26 @@ const BoardSchema: Schema = new Schema({
         type: String,
         default: "NORMAL"
     },
-    cards: {
-        type: [
-            {
-                code: {
-                    type: String,
-                    required: true
-                },
-                title: {
-                    type: String,
-                    required: true
-                },
-                firstAddedInfo: String,
-                secondeAddedInfo: String,
-                thumbnail: String,
-                link: {
-                    type: String,
-                    required: true
-                },
-                publishedDate: String
-            }
-        ],
-        default: []
-    },
+    cards: [
+        {
+            code: {
+                type: String,
+                required: true
+            },
+            title: {
+                type: String,
+                required: true
+            },
+            firstAddedInfo: String,
+            secondeAddedInfo: String,
+            thumbnail: String,
+            link: {
+                type: String,
+                required: true
+            },
+            publishedDate: String
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now()
@@ -68,9 +65,9 @@ const BoardSchema: Schema = new Schema({
 let BoardModel: Model<IBoard>
 
 try {
-    BoardModel = model<IBoard>('Board', BoardSchema)
-} catch(error) {
-    BoardModel = model<IBoard>('Board')
+    BoardModel = model<IBoard>("Board", BoardSchema)
+} catch (error) {
+    BoardModel = model<IBoard>("Board")
 }
 
 export default BoardModel
