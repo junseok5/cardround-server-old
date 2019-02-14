@@ -2,9 +2,51 @@ import Joi, { Schema } from "joi"
 import { Context } from "koa"
 import WebsiteModel, { IWebsite } from "../../../database/models/Website"
 import {
+    ReadWebsiteResponse,
     UpdateWebsiteResponse,
     WriteWebsiteResponse
 } from "../../../types/types"
+
+export const readWebsite = async (ctx: Context) => {
+    let result: ReadWebsiteResponse
+    const { id } = ctx.params
+
+    try {
+        const website: IWebsite = await WebsiteModel.findById(id, {
+            createdAt: false,
+            updatedAt: false,
+            category: false
+        }).exec()
+
+        if (website) {
+            result = {
+                ok: true,
+                error: null,
+                website
+            }
+
+            ctx.body = result
+        } else {
+            result = {
+                ok: false,
+                error: "Website was not found.",
+                website: null
+            }
+
+            ctx.status = 404
+            ctx.body = result
+        }
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            website: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
 
 export const writeWebsite = async (ctx: Context) => {
     let result: WriteWebsiteResponse
@@ -25,7 +67,7 @@ export const writeWebsite = async (ctx: Context) => {
     if (validation.error) {
         result = {
             ok: false,
-            error: "Validation failed."
+            error: validation.error
         }
 
         ctx.status = 400
@@ -92,7 +134,7 @@ export const updateWebsite = async (ctx: Context) => {
     const { id } = ctx.params
     const { body } = ctx.request
 
-    let website: IWebsite | null = null
+    let website: any = null
 
     try {
         website = await WebsiteModel.findById(id).exec()
@@ -104,6 +146,7 @@ export const updateWebsite = async (ctx: Context) => {
 
         ctx.status = 500
         ctx.body = result
+        return
     }
 
     if (website) {
@@ -129,7 +172,7 @@ export const updateWebsite = async (ctx: Context) => {
         if (validation.error) {
             result = {
                 ok: false,
-                error: "Validation failed."
+                error: validation.error
             }
 
             ctx.status = 400
@@ -153,10 +196,18 @@ export const updateWebsite = async (ctx: Context) => {
         try {
             const patchData = {
                 ...website.toObject(),
-                ...body
+                ...body,
+                updatedAt: Date.now()
             }
 
-            await website.update({ ...patchData })
+            await website.updateOne({ ...patchData })
+
+            result = {
+                ok: true,
+                error: null
+            }
+
+            ctx.body = result
         } catch (error) {
             result = {
                 ok: false,

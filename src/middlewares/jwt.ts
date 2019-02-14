@@ -1,5 +1,4 @@
 import { Context } from "koa"
-import { IUser } from "../database/models/User"
 import decodeJWT from "../utils/decodeJWT"
 
 export default async (ctx: Context, next: () => Promise<any>) => {
@@ -11,7 +10,7 @@ export default async (ctx: Context, next: () => Promise<any>) => {
     }
 
     try {
-        const user: IUser | null = await decodeJWT(token)
+        const user = await decodeJWT(token)
 
         ctx.user = user
     } catch (error) {

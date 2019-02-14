@@ -1,8 +1,5 @@
-export interface UserInfo {
-    email: string
-    displayName: string
-    thumbnail: string
-}
+import { IWebsite } from "../database/models/Website";
+import { IUser } from "../database/models/User";
 
 export interface LoginResponse {
     ok: boolean
@@ -13,7 +10,7 @@ export interface LoginResponse {
 export interface GetUserInfoResponse {
     ok: boolean
     error: string | null
-    user: UserInfo | null
+    user: IUser | null
 }
 
 export interface SendMessageResponse {
@@ -36,12 +33,18 @@ export interface AdminAuthenticationResponse {
     error: string | null
 }
 
+export interface ReadWebsiteResponse {
+    ok: boolean
+    error: error | null
+    website: IWebsite | null
+}
+
 export interface WriteWebsiteResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }
 
 export interface UpdateWebsiteResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }

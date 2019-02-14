@@ -130,6 +130,7 @@ export const adminLogin = async (ctx: Context) => {
         }
 
         ctx.session.logged = true
+        ctx.body = result
     } else {
         result = {
             ok: false,

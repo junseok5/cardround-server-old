@@ -4,7 +4,8 @@ import * as websitesCtrl from "./websites.ctrl"
 
 const websites: Router = new Router()
 
+websites.get('/:id', websitesCtrl.readWebsite)
 websites.post("/", adminAuthentication, websitesCtrl.writeWebsite)
-websites.patch("/", adminAuthentication, websitesCtrl.updateWebsite)
+websites.patch("/:id", adminAuthentication, websitesCtrl.updateWebsite)
 
 export default websites

@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken"
-import UserModel, { IUser } from "../database/models/User";
 
-const decodeJWT = async (token: string): Promise<IUser | null> => {
+const decodeJWT = (token: string) => {
     try {
         const decoded: any = jwt.verify(token, process.env.JWT_TOKEN || "")
-        const { id } = decoded
-        const user: IUser | null = await UserModel.findOne({ id })
+        const { _id } = decoded
+        const user = {
+            _id
+        }
 
         return user
     } catch (error) {
