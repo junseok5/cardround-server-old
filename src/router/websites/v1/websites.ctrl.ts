@@ -2,10 +2,61 @@ import Joi, { Schema } from "joi"
 import { Context } from "koa"
 import WebsiteModel, { IWebsite } from "../../../database/models/Website"
 import {
+    ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
     WriteWebsiteResponse
 } from "../../../types/types"
+
+export const listWebsite = async (ctx: Context) => {
+    let result: ListWebsiteResponse
+    const page = parseInt(ctx.query.page || 1, 10)
+    // const { category, keyword } = ctx.query
+    const category: string = ctx.query.category
+    const keyword: string = ctx.query.keyword
+
+    let query = {}
+    const baseQuery = { private: false }
+
+    query = category ? { ...baseQuery, category } : { ...baseQuery }
+    query = keyword ? {
+        ...query,
+        name: { $regex: keyword, $options: "i" }
+    } : { ...query }
+
+    if (page < 1) {
+        result = {
+            ok: false,
+            error: "Page must have more than 1.",
+            websites: null
+        }
+
+        ctx.status = 400
+        ctx.body = result
+        return
+    }
+
+    try {
+        const websites: IWebsite[] = await WebsiteModel.findList(query, page)
+
+        result = {
+            ok: true,
+            error: null,
+            websites
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            websites: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
 
 export const readWebsite = async (ctx: Context) => {
     let result: ReadWebsiteResponse
@@ -155,7 +206,8 @@ export const updateWebsite = async (ctx: Context) => {
             thumbnail: true,
             link: true,
             category: true,
-            boards: true
+            boards: true,
+            private: true
         }
 
         const schema: Schema = Joi.object({
@@ -164,7 +216,8 @@ export const updateWebsite = async (ctx: Context) => {
                 .max(50),
             thumbnail: Joi.string(),
             link: Joi.string(),
-            category: Joi.string()
+            category: Joi.string(),
+            private: Joi.boolean()
         })
 
         const validation = Joi.validate(body, schema)

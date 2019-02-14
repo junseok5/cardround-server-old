@@ -33,6 +33,12 @@ export interface AdminAuthenticationResponse {
     error: string | null
 }
 
+export interface ListWebsiteResponse {
+    ok: boolean
+    error: error | null
+    websites: IWebsite[] | null
+}
+
 export interface ReadWebsiteResponse {
     ok: boolean
     error: error | null

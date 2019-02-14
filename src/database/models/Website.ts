@@ -6,7 +6,8 @@ export interface IWebsite extends Document {
     link: string
     category: string
     boards: Schema.Types.ObjectId[]
-    score: number
+    follower: number
+    private: boolean
     createdAt: Date
     updatedAt: Date
 }
@@ -39,6 +40,10 @@ const WebsiteSchema: Schema = new Schema({
         type: Number,
         default: 0
     },
+    private: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now()
@@ -48,6 +53,21 @@ const WebsiteSchema: Schema = new Schema({
         default: Date.now()
     }
 })
+
+const NumPerPage = 20
+
+WebsiteSchema.statics.findList = function(query, page) {
+    return this.find(query, {
+        boards: false,
+        category: false,
+        createdAt: false,
+        updatedAt: false
+    })
+        .sort({ follower: "asc" })
+        .limit((page - 1) * NumPerPage)
+        .lean()
+        .exec()
+}
 
 let WebsiteModel
 
