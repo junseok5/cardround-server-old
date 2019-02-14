@@ -1,5 +1,6 @@
 import { IWebsite } from "../database/models/Website";
 import { IUser } from "../database/models/User";
+import { IBoard } from "../database/models/Board";
 
 export interface LoginResponse {
     ok: boolean
@@ -53,4 +54,10 @@ export interface WriteWebsiteResponse {
 export interface UpdateWebsiteResponse {
     ok: boolean
     error: error | null
+}
+
+export interface ReadBoardResponse {
+    ok: boolean
+    error: error | null
+    board: IBoard | null
 }

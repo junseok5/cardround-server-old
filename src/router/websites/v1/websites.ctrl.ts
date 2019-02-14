@@ -80,7 +80,7 @@ export const readWebsite = async (ctx: Context) => {
         } else {
             result = {
                 ok: false,
-                error: "Website was not found.",
+                error: "Website does not found.",
                 website: null
             }
 
