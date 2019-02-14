@@ -1,12 +1,12 @@
 import { Document, model, Schema } from "mongoose";
 
-export interface IFollow extends Document {
+export interface IFollowBoard extends Document {
     user: Schema.Types.ObjectId,
     board: Schema.Types.ObjectId,
     score: number
 }
 
-const FollowSchema: Schema = new Schema({
+const FollowBoardSchema: Schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -24,12 +24,12 @@ const FollowSchema: Schema = new Schema({
     }
 })
 
-let FollowModel
+let FolloBoardwModel
 
 try {
-    FollowModel = model<IFollow>('Follow', FollowSchema)
+    FolloBoardwModel = model<IFollowBoard>('Follow', FollowBoardSchema)
 } catch(error) {
-    FollowModel = model<IFollow>('Follow')
+    FolloBoardwModel = model<IFollowBoard>('Follow')
 }
 
-export default FollowModel
+export default FolloBoardwModel

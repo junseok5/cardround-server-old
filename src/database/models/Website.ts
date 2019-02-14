@@ -6,6 +6,7 @@ export interface IWebsite extends Document {
     link: string
     category: string
     boards: Schema.Types.ObjectId[]
+    score: number
     createdAt: Date
     updatedAt: Date
 }
@@ -34,6 +35,10 @@ const WebsiteSchema: Schema = new Schema({
             ref: "Board"
         }
     ],
+    follower: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now()
