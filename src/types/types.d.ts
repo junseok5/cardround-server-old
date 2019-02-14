@@ -21,7 +21,17 @@ export interface SendMessageResponse {
     error: string | null
 }
 
-export interface AuthenticationResponse {
+export interface UserAuthenticationResponse {
+    ok: boolean
+    error: string | null
+}
+
+export interface AdminLoginResponse {
+    ok: boolean
+    error: string | null
+}
+
+export interface AdminAuthenticationResponse {
     ok: boolean
     error: string | null
 }

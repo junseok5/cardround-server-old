@@ -1,7 +1,7 @@
 import Joi, { Schema } from "joi"
 import { Context } from "koa"
 import UserModel, { IUser } from "../../../database/models/User"
-import { LoginResponse } from "../../../types/types"
+import { AdminLoginResponse, LoginResponse } from "../../../types/types"
 import createJWT from "../../../utils/createJWT"
 import getGoogleProfile from "../../../utils/getGoogleProfile"
 
@@ -98,7 +98,7 @@ export const login = async (ctx: Context) => {
             }).save()
 
             const token = await createJWT(newUser._id)
-            
+
             result = {
                 ok: true,
                 error: null,
@@ -116,5 +116,27 @@ export const login = async (ctx: Context) => {
             ctx.status = 500
             ctx.body = result
         }
+    }
+}
+
+export const adminLogin = async (ctx: Context) => {
+    let result: AdminLoginResponse
+    const { password } = ctx.request.body
+
+    if (password === process.env.ADMIN_PASSWORD) {
+        result = {
+            ok: true,
+            error: null
+        }
+
+        ctx.session.logged = true
+    } else {
+        result = {
+            ok: false,
+            error: "Not match password"
+        }
+
+        ctx.status = 401
+        ctx.body = result
     }
 }
