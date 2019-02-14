@@ -40,3 +40,8 @@ export interface WriteWebsiteResponse {
     ok: boolean
     error: string | null
 }
+
+export interface UpdateWebsiteResponse {
+    ok: boolean
+    error: string | null
+}
