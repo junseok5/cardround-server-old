@@ -1,5 +1,6 @@
 import Router from 'koa-router'
-import auth from './auth'
+import auth from './auth/auth'
+import messages from './messages/messages'
 
 const router: Router = new Router()
 
@@ -14,5 +15,6 @@ const router: Router = new Router()
 */
 
 router.use('/auth', auth.routes())
+router.use('/messages', messages.routes())
 
 export default router

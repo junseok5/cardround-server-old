@@ -1,8 +1,8 @@
 import Router from 'koa-router'
-import v1 from './v1/v1'
+import users from './users/users'
 
 const router: Router = new Router()
 
-router.use('/v1', v1.routes())
+router.use('/users', users.routes())
 
 export default router

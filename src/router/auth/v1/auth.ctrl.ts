@@ -1,9 +1,9 @@
-import Joi, { Schema } from 'joi'
-import { Context } from "koa";
-import UserModel, { IUser } from '../../../database/models/User';
-import { LoginResponse } from '../../../types/types';
-import createJWT from '../../../utils/createJWT';
-import getGoogleProfile from '../../../utils/getGoogleProfile';
+import Joi, { Schema } from "joi"
+import { Context } from "koa"
+import UserModel, { IUser } from "../../../database/models/User"
+import { LoginResponse } from "../../../types/types"
+import createJWT from "../../../utils/createJWT"
+import getGoogleProfile from "../../../utils/getGoogleProfile"
 
 export const login = async (ctx: Context) => {
     let result: LoginResponse
@@ -24,7 +24,7 @@ export const login = async (ctx: Context) => {
 
     try {
         profile = await getGoogleProfile(body.accessToken)
-    } catch(error) {
+    } catch (error) {
         result = {
             ok: false,
             error: error.message,
@@ -33,24 +33,26 @@ export const login = async (ctx: Context) => {
 
         ctx.status = 401
         ctx.body = result
+        return
     }
 
     if (!profile) {
         result = {
             ok: false,
-            error: "Cannot find google profile.",
+            error: "Could not find google profile.",
             token: null
         }
 
         ctx.status = 401
         ctx.body = result
+        return
     }
 
     let user: IUser | null = null
 
     try {
         user = await UserModel.findSocialId({ id: profile.id })
-    } catch(error) {
+    } catch (error) {
         result = {
             ok: false,
             error: error.message,
@@ -59,6 +61,7 @@ export const login = async (ctx: Context) => {
 
         ctx.status = 500
         ctx.body = result
+        return
     }
 
     if (user) {
@@ -86,7 +89,7 @@ export const login = async (ctx: Context) => {
     } else {
         // 회원가입
         try {
-            user = await new UserModel({
+            const newUser = await new UserModel({
                 email: profile.email,
                 displayName: profile.name,
                 thumbnail: profile.thumbnail,
@@ -94,27 +97,16 @@ export const login = async (ctx: Context) => {
                 socialId: profile.id
             }).save()
 
-            if (user) {
-                const token = await createJWT(user._id)
-
-                result = {
-                    ok: true,
-                    error: null,
-                    token
-                }
-                
-                ctx.body = result
-            } else {
-                result = {
-                    ok: false,
-                    error: "User register failed.",
-                    token: null
-                }
-
-                ctx.status = 500
-                ctx.body = result
+            const token = await createJWT(newUser._id)
+            
+            result = {
+                ok: true,
+                error: null,
+                token
             }
-        } catch(error) {
+
+            ctx.body = result
+        } catch (error) {
             result = {
                 ok: false,
                 error: error.message,
