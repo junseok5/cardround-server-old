@@ -13,12 +13,14 @@ export interface IWebsite extends Document {
 const WebsiteSchema: Schema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     thumbnail: String,
     link: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     category: {
         type: [String],

@@ -35,3 +35,8 @@ export interface AdminAuthenticationResponse {
     ok: boolean
     error: string | null
 }
+
+export interface WriteWebsiteResponse {
+    ok: boolean
+    error: string | null
+}

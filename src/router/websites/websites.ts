@@ -1,5 +1,5 @@
-import Router from "koa-router"
-import v1 from "./v1/v1"
+import Router from 'koa-router'
+import v1 from './v1/v1'
 
 const router: Router = new Router()
 
