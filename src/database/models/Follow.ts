@@ -10,7 +10,8 @@ const FollowSchema: Schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
     },
     board: {
         type: Schema.Types.ObjectId,

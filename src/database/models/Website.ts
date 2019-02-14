@@ -4,7 +4,7 @@ export interface IWebsite extends Document {
     name: string
     thumbnail?: string
     link: string
-    category: string[]
+    category: string
     boards: Schema.Types.ObjectId[]
     createdAt: Date
     updatedAt: Date
@@ -14,7 +14,8 @@ const WebsiteSchema: Schema = new Schema({
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        index: true
     },
     thumbnail: String,
     link: {
@@ -23,8 +24,9 @@ const WebsiteSchema: Schema = new Schema({
         unique: true
     },
     category: {
-        type: [String],
-        required: true
+        type: String,
+        required: true,
+        index: true
     },
     boards: [
         {

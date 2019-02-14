@@ -14,9 +14,7 @@ export const writeWebsite = async (ctx: Context) => {
             .required(),
         thumbnail: Joi.string(),
         link: Joi.string().required(),
-        category: Joi.array()
-            .items(Joi.string())
-            .required()
+        category: Joi.string().required()
     })
 
     const validation = Joi.validate(body, schema)

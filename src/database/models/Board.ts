@@ -14,6 +14,7 @@ export interface IBoard extends Document {
     name: string
     link: string
     layoutType: string
+    follower: number,
     cards: ICard[]
     createdAt: Date
     updatedAt: Date
@@ -22,7 +23,8 @@ export interface IBoard extends Document {
 const BoardSchema: Schema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     link: {
         type: String,
@@ -31,6 +33,10 @@ const BoardSchema: Schema = new Schema({
     layoutType: {
         type: String,
         default: "NORMAL"
+    },
+    follower: {
+        type: Number,
+        default: 0
     },
     cards: [
         {
