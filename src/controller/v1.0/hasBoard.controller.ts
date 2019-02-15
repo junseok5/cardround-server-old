@@ -1,6 +1,5 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import { Types } from "mongoose"
 import HasBoardModel, { IHasBoard } from "../../database/models/HasBoard"
 import PreviewBoardModel, {
     IPreviewBoard
@@ -17,9 +16,8 @@ export const listHasBoard = async (ctx: Context) => {
     const page = parseInt(ctx.query.page || 1, 10)
     const { websiteId } = ctx.params
 
-    const websiteObjectId = Types.ObjectId(websiteId)
     const query = {
-        website: websiteObjectId
+        website: websiteId
     }
 
     try {
