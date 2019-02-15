@@ -19,10 +19,12 @@ export const listWebsite = async (ctx: Context) => {
     const baseQuery = { private: false }
 
     query = category ? { ...baseQuery, category } : { ...baseQuery }
-    query = keyword ? {
-        ...query,
-        name: { $regex: keyword, $options: "i" }
-    } : { ...query }
+    query = keyword
+        ? {
+              ...query,
+              name: { $regex: keyword, $options: "i" }
+          }
+        : { ...query }
 
     if (page < 1) {
         result = {

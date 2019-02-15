@@ -71,3 +71,13 @@ export interface UpdateBoardResponse {
     ok: boolean
     error: error | null
 }
+
+export interface WriteHasBoardResponse {
+    ok: boolean
+    error: error | null
+}
+
+export interface RemoveHasBoardResponse {
+    ok: boolean
+    error: error | null
+}
