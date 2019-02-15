@@ -1,12 +1,12 @@
-import Joi, { Schema } from "joi"
+import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import WebsiteModel, { IWebsite } from "../../../database/models/Website"
+import WebsiteModel, { IWebsite } from "../database/models/Website"
 import {
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
     WriteWebsiteResponse
-} from "../../../types/types"
+} from "../types/types"
 
 export const listWebsite = async (ctx: Context) => {
     let result: ListWebsiteResponse
@@ -113,7 +113,7 @@ export const writeWebsite = async (ctx: Context) => {
         category: Joi.string().required()
     })
 
-    const validation = Joi.validate(body, schema)
+    const validation: ValidationResult<any> = Joi.validate(body, schema)
 
     if (validation.error) {
         result = {
@@ -206,7 +206,6 @@ export const updateWebsite = async (ctx: Context) => {
             thumbnail: true,
             link: true,
             category: true,
-            boards: true,
             private: true
         }
 
@@ -220,7 +219,7 @@ export const updateWebsite = async (ctx: Context) => {
             private: Joi.boolean()
         })
 
-        const validation = Joi.validate(body, schema)
+        const validation: ValidationResult<any> = Joi.validate(body, schema)
 
         if (validation.error) {
             result = {
@@ -273,7 +272,7 @@ export const updateWebsite = async (ctx: Context) => {
     } else {
         result = {
             ok: false,
-            error: "Website was not found."
+            error: "Website does not found."
         }
 
         ctx.status = 404

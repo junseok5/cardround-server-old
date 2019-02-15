@@ -16,6 +16,7 @@ export interface IBoard extends Document {
     layoutType: string
     follower: number,
     cards: ICard[]
+    private: boolean
     createdAt: Date
     updatedAt: Date
 }
@@ -32,7 +33,7 @@ const BoardSchema: Schema = new Schema({
     },
     layoutType: {
         type: String,
-        default: "NORMAL"
+        default: "PHOTO_NORMAL"
     },
     follower: {
         type: Number,
@@ -58,6 +59,10 @@ const BoardSchema: Schema = new Schema({
             publishedDate: String
         }
     ],
+    private: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now()

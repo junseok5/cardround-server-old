@@ -5,7 +5,6 @@ export interface IWebsite extends Document {
     thumbnail?: string
     link: string
     category: string
-    boards: Schema.Types.ObjectId[]
     follower: number
     private: boolean
     createdAt: Date
@@ -30,12 +29,6 @@ const WebsiteSchema: Schema = new Schema({
         required: true,
         index: true
     },
-    boards: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Board"
-        }
-    ],
     follower: {
         type: Number,
         default: 0
@@ -58,7 +51,6 @@ const NumPerPage = 20
 
 WebsiteSchema.statics.findList = function(query, page) {
     return this.find(query, {
-        boards: false,
         category: false,
         createdAt: false,
         updatedAt: false

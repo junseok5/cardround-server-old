@@ -1,9 +1,9 @@
 import Joi, { Schema } from "joi"
 import { Context } from "koa"
-import UserModel, { IUser } from "../../../database/models/User"
-import { AdminLoginResponse, LoginResponse } from "../../../types/types"
-import createJWT from "../../../utils/createJWT"
-import getGoogleProfile from "../../../utils/getGoogleProfile"
+import UserModel, { IUser } from "../database/models/User";
+import { AdminLoginResponse, LoginResponse } from "../types/types";
+import createJWT from "../utils/createJWT";
+import getGoogleProfile from "../utils/getGoogleProfile";
 
 export const login = async (ctx: Context) => {
     let result: LoginResponse

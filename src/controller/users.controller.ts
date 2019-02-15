@@ -1,6 +1,6 @@
 import { Context } from "koa"
-import UserModel, { IUser } from "../../../../database/models/User"
-import { GetUserInfoResponse } from "../../../../types/types"
+import UserModel, { IUser } from "../database/models/User";
+import { GetUserInfoResponse } from "../types/types";
 
 export const getUserInfo = async (ctx: Context) => {
     let result: GetUserInfoResponse

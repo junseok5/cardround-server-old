@@ -1,7 +1,7 @@
 import Joi, { Schema } from "joi"
 import { Context } from "koa"
-import MessageModel from "../../../database/models/Message"
-import { SendMessageResponse } from "../../../types/types"
+import MessageModel from "../database/models/Message"
+import { SendMessageResponse } from "../types/types"
 
 export const sendMessage = async (ctx: Context) => {
     let result: SendMessageResponse

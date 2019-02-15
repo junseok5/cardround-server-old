@@ -4,7 +4,7 @@ import session from "koa-session"
 // import logger from "morgan"
 import database from "./database/database"
 import jwt from "./middlewares/jwt"
-import router from "./router/router"
+import router from "./routers"
 
 class App {
     public app: Koa

@@ -61,3 +61,13 @@ export interface ReadBoardResponse {
     error: error | null
     board: IBoard | null
 }
+
+export interface WriteBoardResponse {
+    ok: boolean
+    error: error | null
+}
+
+export interface UpdateBoardResponse {
+    ok: boolean
+    error: error | null
+}
