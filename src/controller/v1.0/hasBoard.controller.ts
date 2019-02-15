@@ -175,7 +175,7 @@ export const writeHasBoard = async (ctx: Context) => {
 
 export const removeHasBoard = async (ctx: Context) => {
     let result: RemoveHasBoardResponse
-    const { websiteId, previewBoardId } = ctx.request.body
+    const { websiteId, previewBoardId } = ctx.params
 
     let hasBoard: IHasBoard | null
 
