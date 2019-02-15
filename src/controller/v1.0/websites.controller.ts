@@ -1,17 +1,16 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import WebsiteModel, { IWebsite } from "../database/models/Website"
+import WebsiteModel, { IWebsite } from "../../database/models/Website"
 import {
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
     WriteWebsiteResponse
-} from "../types/types"
+} from "../../types/types"
 
 export const listWebsite = async (ctx: Context) => {
     let result: ListWebsiteResponse
     const page = parseInt(ctx.query.page || 1, 10)
-    // const { category, keyword } = ctx.query
     const category: string = ctx.query.category
     const keyword: string = ctx.query.keyword
 
@@ -65,11 +64,11 @@ export const readWebsite = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const website: IWebsite = await WebsiteModel.findById(id, {
+        const website: IWebsite | null = await WebsiteModel.findById(id, {
             createdAt: false,
             updatedAt: false,
             category: false
-        }).exec()
+        })
 
         if (website) {
             result = {
@@ -190,7 +189,7 @@ export const updateWebsite = async (ctx: Context) => {
     let website: any = null
 
     try {
-        website = await WebsiteModel.findById(id).exec()
+        website = await WebsiteModel.findById(id)
     } catch (error) {
         result = {
             ok: false,
@@ -254,7 +253,7 @@ export const updateWebsite = async (ctx: Context) => {
                 updatedAt: Date.now()
             }
 
-            await website.updateOne({ ...patchData })
+            await website.updateOne({ ...patchData, updatedAt: Date.now() })
 
             result = {
                 ok: true,

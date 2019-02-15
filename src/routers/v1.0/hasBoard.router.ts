@@ -1,13 +1,11 @@
 import Router from "koa-router"
-import * as hasBoardCtrl from "../../controller/hasBoard.controller"
+import * as hasBoardCtrl from "../../controller/v1.0/hasBoard.controller"
+import adminAuthentication from "../../middlewares/admin.authentication"
 
 const router: Router = new Router()
 
-router.post(
-    "/has-board/websites/:websiteId/boards/:boardId",
-    hasBoardCtrl.writeHasBoard
-)
-router.delete(
-    "/has-board/websites/:websiteId/boards/:boardId",
-    hasBoardCtrl.removeHasBoard
-)
+router.get("/has-board/:websiteId", hasBoardCtrl.listHasBoard)
+router.post("/has-board", adminAuthentication, hasBoardCtrl.writeHasBoard)
+router.delete("/has-board", adminAuthentication, hasBoardCtrl.removeHasBoard)
+
+export default router

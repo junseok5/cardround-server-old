@@ -10,7 +10,8 @@ export interface ICard {
     publishedDate: string
 }
 
-export interface IBoard extends Document {
+export interface IPreviewBoard extends Document {
+    board: Schema.Types.ObjectId
     name: string
     link: string
     layoutType: string
@@ -21,7 +22,12 @@ export interface IBoard extends Document {
     updatedAt: Date
 }
 
-const BoardSchema: Schema = new Schema({
+const PreviewBoardSchema: Schema = new Schema({
+    board: {
+        type: Schema.Types.ObjectId,
+        ref: "Board",
+        required: true
+    },
     name: {
         type: String,
         required: true,
@@ -73,6 +79,9 @@ const BoardSchema: Schema = new Schema({
     }
 })
 
-const BoardModel: any = model<IBoard>("Board", BoardSchema)
+const PreviewBoardModel: any = model<IPreviewBoard>(
+    "PreviewBoard",
+    PreviewBoardSchema
+)
 
-export default BoardModel
+export default PreviewBoardModel

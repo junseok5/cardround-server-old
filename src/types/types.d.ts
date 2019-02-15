@@ -1,6 +1,7 @@
 import { IWebsite } from "../database/models/Website";
 import { IUser } from "../database/models/User";
 import { IBoard } from "../database/models/Board";
+import { IHasBoard } from "../database/models/HasBoard";
 
 export interface LoginResponse {
     ok: boolean
@@ -80,4 +81,10 @@ export interface WriteHasBoardResponse {
 export interface RemoveHasBoardResponse {
     ok: boolean
     error: error | null
+}
+
+export interface ListHasBoardResponse {
+    ok: boolean
+    error: error | null
+    hasBoards: IHasBoard[] | null
 }

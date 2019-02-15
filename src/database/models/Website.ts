@@ -55,18 +55,11 @@ WebsiteSchema.statics.findList = function(query, page) {
         createdAt: false,
         updatedAt: false
     })
-        .sort({ follower: "asc" })
+        .sort({ follower: "desc" })
         .limit((page - 1) * NumPerPage)
         .lean()
-        .exec()
 }
 
-let WebsiteModel
-
-try {
-    WebsiteModel = model<IWebsite>("Website", WebsiteSchema)
-} catch (error) {
-    WebsiteModel = model<IWebsite>("Website")
-}
+const WebsiteModel: any = model<IWebsite>("Website", WebsiteSchema)
 
 export default WebsiteModel

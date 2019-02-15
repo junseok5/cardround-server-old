@@ -19,12 +19,6 @@ const MessageSchema: Schema = new Schema({
     }
 })
 
-let MessageModel
-
-try {
-    MessageModel = model<IMessage>("Message", MessageSchema)
-} catch (error) {
-    MessageModel = model<IMessage>("Message")
-}
+const MessageModel: any = model<IMessage>("Message", MessageSchema)
 
 export default MessageModel

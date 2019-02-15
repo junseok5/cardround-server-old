@@ -1,11 +1,12 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import BoardModel, { IBoard } from "../database/models/Board"
+import BoardModel, { IBoard } from "../../database/models/Board"
+import PreviewBoardModel from "../../database/models/PreviewBoard"
 import {
     ReadBoardResponse,
     UpdateBoardResponse,
     WriteBoardResponse
-} from "../types/types"
+} from "../../types/types"
 
 export const listBoard = async (ctx: Context) => {
     // 사용자 많아지면 도입
@@ -16,10 +17,10 @@ export const readBoard = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const board: IBoard = await BoardModel.findById(id, {
+        const board: IBoard | null = await BoardModel.findById(id, {
             createdAt: false,
             updatedAt: false
-        }).exec()
+        })
 
         if (board) {
             result = {
@@ -84,7 +85,14 @@ export const writeBoard = async (ctx: Context) => {
     const { name, link, layoutType } = body
 
     try {
-        await new BoardModel({
+        const board = await new BoardModel({
+            name,
+            link,
+            layoutType
+        }).save()
+
+        await new PreviewBoardModel({
+            board: board._id,
             name,
             link,
             layoutType
@@ -112,10 +120,11 @@ export const updateBoard = async (ctx: Context) => {
     const { id } = ctx.params
     const { body } = ctx.request
 
+    let previewBoard: any = null
     let board: any = null
 
     try {
-        board = await BoardModel.findById(id).exec()
+        previewBoard = await PreviewBoardModel.findById(id)
     } catch (error) {
         result = {
             ok: false,
@@ -127,80 +136,112 @@ export const updateBoard = async (ctx: Context) => {
         return
     }
 
-    if (board) {
-        const allowedFields = {
-            name: true,
-            link: true,
-            layoutType: true
+    if (!previewBoard) {
+        result = {
+            ok: false,
+            error: "PreviewBoard does not found."
         }
 
-        const schema: Schema = Joi.object({
-            name: Joi.string()
-                .min(1)
-                .max(50),
-            link: Joi.string(),
-            layoutType: Joi.string().regex(
-                /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
-            )
-        })
+        ctx.status = 404
+        ctx.body = result
+        return
+    }
 
-        const validation: ValidationResult<any> = Joi.validate(body, schema)
-
-        if (validation.error) {
-            result = {
-                ok: false,
-                error: validation.error
-            }
-
-            ctx.status = 400
-            ctx.body = result
-            return
+    try {
+        board = await BoardModel.findById(previewBoard.board)
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message
         }
 
-        for (const field in body) {
-            if (!allowedFields[field]) {
-                result = {
-                    ok: false,
-                    error: `${field} is not allowed field.`
-                }
+        ctx.status = 500
+        ctx.body = result
+        return
+    }
 
-                ctx.status = 400
-                ctx.body = result
-                return
-            }
-        }
-
-        try {
-            const patchData = {
-                ...board.toObject(),
-                ...body,
-                updatedAt: Date.now()
-            }
-
-            await board.updateOne({ ...patchData })
-
-            result = {
-                ok: true,
-                error: null
-            }
-
-            ctx.body = result
-        } catch(error) {
-            result = {
-                ok: false,
-                error: error.message
-            }
-
-            ctx.status = 500
-            ctx.body = result
-        }
-    } else {
+    if (!board) {
         result = {
             ok: false,
             error: "Board does not found."
         }
 
         ctx.status = 404
+        ctx.body = result
+        return
+    }
+
+    const allowedFields = {
+        name: true,
+        link: true,
+        layoutType: true
+    }
+
+    const schema: Schema = Joi.object({
+        name: Joi.string()
+            .min(1)
+            .max(50),
+        link: Joi.string(),
+        layoutType: Joi.string().regex(
+            /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
+        )
+    })
+
+    const validation: ValidationResult<any> = Joi.validate(body, schema)
+
+    if (validation.error) {
+        result = {
+            ok: false,
+            error: validation.error
+        }
+
+        ctx.status = 400
+        ctx.body = result
+        return
+    }
+
+    for (const field in body) {
+        if (!allowedFields[field]) {
+            result = {
+                ok: false,
+                error: `${field} is not allowed field.`
+            }
+
+            ctx.status = 400
+            ctx.body = result
+            return
+        }
+    }
+
+    try {
+        const boardPatchData = {
+            ...board.toObject(),
+            ...body,
+            updatedAt: Date.now()
+        }
+
+        const previewBoardPatchData = {
+            ...previewBoard.toObject(),
+            ...body,
+            updatedAt: Date.now()
+        }
+
+        await board.updateOne({ ...boardPatchData })
+        await previewBoard.updateOne({ ...previewBoardPatchData })
+
+        result = {
+            ok: true,
+            error: null
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message
+        }
+
+        ctx.status = 500
         ctx.body = result
     }
 }

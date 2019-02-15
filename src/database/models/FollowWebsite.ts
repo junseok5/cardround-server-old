@@ -16,15 +16,9 @@ const FollowWebsiteSchema: Schema = new Schema({
     }
 })
 
-let FollowWebsiteModel
-
-try {
-    FollowWebsiteModel = model<IFollowWebsite>(
-        "FollowWebsite",
-        FollowWebsiteSchema
-    )
-} catch (error) {
-    FollowWebsiteModel = model<IFollowWebsite>("FollowWebsite")
-}
+const FollowWebsiteModel: any = model<IFollowWebsite>(
+    "FollowWebsite",
+    FollowWebsiteSchema
+)
 
 export default FollowWebsiteModel

@@ -1,5 +1,5 @@
 import Router from 'koa-router'
-import * as boardsCtrl from '../../controller/boards.controller'
+import * as boardsCtrl from '../../controller/v1.0/boards.controller'
 import adminAuthentication from '../../middlewares/admin.authentication';
 
 const router: Router = new Router()

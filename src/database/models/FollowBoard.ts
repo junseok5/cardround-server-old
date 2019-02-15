@@ -1,21 +1,21 @@
-import { Document, model, Schema } from "mongoose";
+import { Document, model, Schema } from "mongoose"
 
 export interface IFollowBoard extends Document {
-    user: Schema.Types.ObjectId,
-    board: Schema.Types.ObjectId,
+    user: Schema.Types.ObjectId
+    previewBoard: Schema.Types.ObjectId
     score: number
 }
 
 const FollowBoardSchema: Schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
         required: true,
         index: true
     },
-    board: {
+    previewBoard: {
         type: Schema.Types.ObjectId,
-        ref: 'Board',
+        ref: "PreviewBoard",
         required: true
     },
     score: {
@@ -24,12 +24,6 @@ const FollowBoardSchema: Schema = new Schema({
     }
 })
 
-let FolloBoardwModel
-
-try {
-    FolloBoardwModel = model<IFollowBoard>('Follow', FollowBoardSchema)
-} catch(error) {
-    FolloBoardwModel = model<IFollowBoard>('Follow')
-}
+const FolloBoardwModel: any = model<IFollowBoard>("Follow", FollowBoardSchema)
 
 export default FolloBoardwModel

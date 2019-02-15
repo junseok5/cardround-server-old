@@ -1,5 +1,5 @@
 import Router from "koa-router"
-import * as websitesCtrl from "../../controller/websites.controller"
+import * as websitesCtrl from "../../controller/v1.0/websites.controller"
 import adminAuthentication from "../../middlewares/admin.authentication"
 
 const router: Router = new Router()

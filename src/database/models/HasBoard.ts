@@ -2,7 +2,7 @@ import { Document, model, Schema } from "mongoose"
 
 export interface IHasBoard extends Document {
     website: Schema.Types.ObjectId
-    board: Schema.Types.ObjectId
+    previewBoard: Schema.Types.ObjectId
 }
 
 const HasBoardSchema: Schema = new Schema({
@@ -10,21 +10,30 @@ const HasBoardSchema: Schema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Website"
     },
-    board: {
+    previewBoard: {
         type: Schema.Types.ObjectId,
-        ref: "Board"
+        ref: "PreviewBoard"
     }
 })
 
-let HasBoardModel
+const NumPerPage = 20
 
-try {
-    HasBoardModel = model<IHasBoard>(
-        "HasBoard",
-        HasBoardSchema
+HasBoardSchema.statics.findList = function(query, page) {
+    return (
+        this.find(query, {
+            website: false
+        })
+            .sort({ follower: "desc" })
+            .limit((page - 1) * NumPerPage)
+            .populate({
+                path: "previewBoard",
+                model: "PreviewBoard",
+                select: "board name link layoutType cards follower"
+            })
+            .lean()
     )
-} catch (error) {
-    HasBoardModel = model<IHasBoard>("HasBoard")
 }
+
+const HasBoardModel: any = model<IHasBoard>("HasBoard", HasBoardSchema)
 
 export default HasBoardModel

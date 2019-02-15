@@ -1,18 +1,18 @@
 import { Context } from "koa"
-import UserModel, { IUser } from "../database/models/User";
-import { GetUserInfoResponse } from "../types/types";
+import UserModel, { IUser } from "../../database/models/User"
+import { GetUserInfoResponse } from "../../types/types"
 
 export const getUserInfo = async (ctx: Context) => {
     let result: GetUserInfoResponse
     const { id } = ctx.params
 
     try {
-        const user: IUser = await UserModel.findById(id, {
+        const user: IUser | null = await UserModel.findById(id, {
             socialId: false,
             accessToken: false,
             createdAt: false,
             updatedAt: false
-        }).exec()
+        })
 
         if (user) {
             result = {

@@ -1,4 +1,4 @@
-import { Document, model, Schema } from 'mongoose'
+import { Document, model, Schema } from "mongoose"
 
 export interface IUser extends Document {
     email: string
@@ -47,12 +47,6 @@ UserSchema.statics.findSocialId = function({ id }) {
     return this.findOne({ socialId: id })
 }
 
-let UserModel
-
-try {
-    UserModel = model<IUser>('User', UserSchema)
-} catch(error) {
-    UserModel = model<IUser>('User')
-}
+const UserModel: any = model<IUser>("User", UserSchema)
 
 export default UserModel
