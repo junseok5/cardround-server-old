@@ -1,23 +1,29 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import BoardModel, { IBoard } from "../../database/models/Board"
-import PreviewBoardModel from "../../database/models/PreviewBoard"
+import BoardModel, { IBoardDocument } from "../../database/models/Board"
+import PreviewBoardModel, { IPreviewBoardDocument } from "../../database/models/PreviewBoard"
 import {
     ReadBoardResponse,
     UpdateBoardResponse,
     WriteBoardResponse
 } from "../../types/types"
 
+/*
+    [GET] /v1.0/boards/
+*/
 export const listBoard = async (ctx: Context) => {
     // 사용자 많아지면 도입
 }
 
+/*
+    [GET] /v1.0/boards/:id
+*/
 export const readBoard = async (ctx: Context) => {
     let result: ReadBoardResponse
     const { id } = ctx.params
 
     try {
-        const board: IBoard | null = await BoardModel.findById(id, {
+        const board: IBoardDocument | null = await BoardModel.findById(id, {
             createdAt: false,
             updatedAt: false
         })
@@ -52,6 +58,9 @@ export const readBoard = async (ctx: Context) => {
     }
 }
 
+/*
+    [POST] /v1.0/boards/
+*/
 export const writeBoard = async (ctx: Context) => {
     let result: WriteBoardResponse
     const { body } = ctx.request
@@ -69,7 +78,7 @@ export const writeBoard = async (ctx: Context) => {
             .required()
     })
 
-    const validation = Joi.validate(body, schema)
+    const validation: ValidationResult<any> = Joi.validate(body, schema)
 
     if (validation.error) {
         result = {
@@ -85,25 +94,32 @@ export const writeBoard = async (ctx: Context) => {
     const { name, link, layoutType } = body
 
     try {
-        const board = await new BoardModel({
+        const board: IBoardDocument | null = await new BoardModel({
             name,
             link,
             layoutType
         }).save()
 
-        await new PreviewBoardModel({
-            board: board._id,
-            name,
-            link,
-            layoutType
-        }).save()
-
-        result = {
-            ok: true,
-            error: null
+        if (board) {
+            await new PreviewBoardModel({
+                board: board._id,
+                name,
+                link,
+                layoutType
+            }).save()
+    
+            result = {
+                ok: true,
+                error: null
+            }
+    
+            ctx.body = result
+        } else {
+            result = {
+                ok: false,
+                error: "Write board failed. Board does not found."
+            }
         }
-
-        ctx.body = result
     } catch (error) {
         result = {
             ok: false,
@@ -115,13 +131,16 @@ export const writeBoard = async (ctx: Context) => {
     }
 }
 
+/*
+    [PATCH] /v1.0/boards/:id
+*/
 export const updateBoard = async (ctx: Context) => {
     let result: UpdateBoardResponse
     const { id } = ctx.params
     const { body } = ctx.request
 
-    let previewBoard: any = null
-    let board: any = null
+    let previewBoard: IPreviewBoardDocument | null = null
+    let board: IBoardDocument | null = null
 
     try {
         previewBoard = await PreviewBoardModel.findById(id)
@@ -226,8 +245,8 @@ export const updateBoard = async (ctx: Context) => {
             updatedAt: Date.now()
         }
 
-        await board.updateOne({ ...boardPatchData })
-        await previewBoard.updateOne({ ...previewBoardPatchData })
+        await board.update({ ...boardPatchData })
+        await previewBoard.update({ ...previewBoardPatchData })
 
         result = {
             ok: true,

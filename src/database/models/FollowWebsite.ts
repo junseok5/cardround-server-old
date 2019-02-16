@@ -1,6 +1,7 @@
 import { Document, model, Schema } from "mongoose"
 
-export interface IFollowWebsite extends Document {
+export interface IFollowWebsiteDocument extends Document {
+    _id: Schema.Types.ObjectId
     user: Schema.Types.ObjectId
     website: Schema.Types.ObjectId
 }
@@ -16,9 +17,4 @@ const FollowWebsiteSchema: Schema = new Schema({
     }
 })
 
-const FollowWebsiteModel: any = model<IFollowWebsite>(
-    "FollowWebsite",
-    FollowWebsiteSchema
-)
-
-export default FollowWebsiteModel
+export default model<IFollowWebsiteDocument>("FollowWebsite", FollowWebsiteSchema)

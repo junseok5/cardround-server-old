@@ -1,6 +1,6 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import WebsiteModel, { IWebsite } from "../../database/models/Website"
+import WebsiteModel, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ListWebsiteResponse,
     ReadWebsiteResponse,
@@ -8,6 +8,9 @@ import {
     WriteWebsiteResponse
 } from "../../types/types"
 
+/*
+    [GET] /v1.0/websites/
+*/
 export const listWebsite = async (ctx: Context) => {
     let result: ListWebsiteResponse
     const page = parseInt(ctx.query.page || 1, 10)
@@ -38,7 +41,10 @@ export const listWebsite = async (ctx: Context) => {
     }
 
     try {
-        const websites: IWebsite[] = await WebsiteModel.findList(query, page)
+        const websites: IWebsiteDocument[] = await WebsiteModel.findList(
+            query,
+            page
+        )
 
         result = {
             ok: true,
@@ -59,16 +65,22 @@ export const listWebsite = async (ctx: Context) => {
     }
 }
 
+/*
+    [GET] /v1.0/websites/:id
+*/
 export const readWebsite = async (ctx: Context) => {
     let result: ReadWebsiteResponse
     const { id } = ctx.params
 
     try {
-        const website: IWebsite | null = await WebsiteModel.findById(id, {
-            createdAt: false,
-            updatedAt: false,
-            category: false
-        })
+        const website: IWebsiteDocument | null = await WebsiteModel.findById(
+            id,
+            {
+                createdAt: false,
+                updatedAt: false,
+                category: false
+            }
+        )
 
         if (website) {
             result = {
@@ -100,6 +112,9 @@ export const readWebsite = async (ctx: Context) => {
     }
 }
 
+/*
+    [POST] /v1.0/websites/
+*/
 export const writeWebsite = async (ctx: Context) => {
     let result: WriteWebsiteResponse
     const { body } = ctx.request
@@ -127,35 +142,22 @@ export const writeWebsite = async (ctx: Context) => {
         return
     }
 
-    let website: IWebsite | null = null
-
     const { name, thumbnail, link, category } = body
 
     try {
-        website = await WebsiteModel.findOne({
+        const website: IWebsiteDocument | null = await WebsiteModel.findOne({
             $or: [{ name }, { link }]
         })
-    } catch (error) {
-        result = {
-            ok: false,
-            error: error.message
-        }
 
-        ctx.status = 500
-        ctx.body = result
-        return
-    }
+        if (website) {
+            result = {
+                ok: false,
+                error: "Website already exist."
+            }
 
-    if (website) {
-        result = {
-            ok: false,
-            error: "Website already exist."
-        }
-
-        ctx.status = 400
-        ctx.body = result
-    } else {
-        try {
+            ctx.status = 400
+            ctx.body = result
+        } else {
             await new WebsiteModel({
                 name,
                 thumbnail,
@@ -169,27 +171,7 @@ export const writeWebsite = async (ctx: Context) => {
             }
 
             ctx.body = result
-        } catch (error) {
-            result = {
-                ok: false,
-                error: error.message
-            }
-
-            ctx.status = 500
-            ctx.body = result
         }
-    }
-}
-
-export const updateWebsite = async (ctx: Context) => {
-    let result: UpdateWebsiteResponse
-    const { id } = ctx.params
-    const { body } = ctx.request
-
-    let website: any = null
-
-    try {
-        website = await WebsiteModel.findById(id)
     } catch (error) {
         result = {
             ok: false,
@@ -200,60 +182,71 @@ export const updateWebsite = async (ctx: Context) => {
         ctx.body = result
         return
     }
+}
 
-    if (website) {
-        const allowedFields = {
-            name: true,
-            thumbnail: true,
-            link: true,
-            category: true,
-            private: true
-        }
+/*
+    [PATCH] /v1.0/websites/:id
+*/
+export const updateWebsite = async (ctx: Context) => {
+    let result: UpdateWebsiteResponse
+    const { id } = ctx.params
+    const { body } = ctx.request
 
-        const schema: Schema = Joi.object({
-            name: Joi.string()
-                .min(1)
-                .max(50),
-            thumbnail: Joi.string(),
-            link: Joi.string(),
-            category: Joi.string(),
-            private: Joi.boolean()
-        })
+    try {
+        const website: IWebsiteDocument | null = await WebsiteModel.findById(id)
 
-        const validation: ValidationResult<any> = Joi.validate(body, schema)
-
-        if (validation.error) {
-            result = {
-                ok: false,
-                error: validation.error
+        if (website) {
+            const allowedFields = {
+                name: true,
+                thumbnail: true,
+                link: true,
+                category: true,
+                private: true
             }
 
-            ctx.status = 400
-            ctx.body = result
-            return
-        }
+            const schema: Schema = Joi.object({
+                name: Joi.string()
+                    .min(1)
+                    .max(50),
+                thumbnail: Joi.string(),
+                link: Joi.string(),
+                category: Joi.string(),
+                private: Joi.boolean()
+            })
 
-        for (const field in body) {
-            if (!allowedFields[field]) {
+            const validation: ValidationResult<any> = Joi.validate(body, schema)
+
+            if (validation.error) {
                 result = {
                     ok: false,
-                    error: `${field} is not allowed field.`
+                    error: validation.error
                 }
 
                 ctx.status = 400
                 ctx.body = result
                 return
             }
-        }
 
-        try {
+            for (const field in body) {
+                if (!allowedFields[field]) {
+                    result = {
+                        ok: false,
+                        error: `${field} is not allowed field.`
+                    }
+
+                    ctx.status = 400
+                    ctx.body = result
+                    return
+                }
+            }
+
             const patchData = {
                 ...website.toObject(),
                 ...body,
                 updatedAt: Date.now()
             }
 
-            await website.updateOne({ ...patchData, updatedAt: Date.now() })
+            await website.update({ ...patchData, updatedAt: Date.now() })
 
             result = {
                 ok: true,
@@ -261,22 +254,23 @@ export const updateWebsite = async (ctx: Context) => {
             }
 
             ctx.body = result
-        } catch (error) {
+        } else {
             result = {
                 ok: false,
-                error: error.message
+                error: "Website does not found."
             }
 
-            ctx.status = 500
+            ctx.status = 404
             ctx.body = result
         }
-    } else {
+    } catch (error) {
         result = {
             ok: false,
-            error: "Website does not found."
+            error: error.message
         }
 
-        ctx.status = 404
+        ctx.status = 500
         ctx.body = result
+        return
     }
 }

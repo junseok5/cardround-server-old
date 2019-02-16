@@ -1,10 +1,13 @@
-import Joi, { Schema } from "joi"
+import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import UserModel, { IUser } from "../../database/models/User"
+import UserModel, { IUserDocument } from "../../database/models/User"
 import { AdminLoginResponse, LoginResponse } from "../../types/types"
 import createJWT from "../../utils/createJWT"
 import getGoogleProfile from "../../utils/getGoogleProfile"
 
+/*
+    [POST] /v1.0/auth/login
+*/
 export const login = async (ctx: Context) => {
     let result: LoginResponse
     const { body } = ctx.request
@@ -13,7 +16,7 @@ export const login = async (ctx: Context) => {
         accessToken: Joi.string().required()
     })
 
-    const validation = Joi.validate(body, schema)
+    const validation: ValidationResult<any> = Joi.validate(body, schema)
 
     if (validation.error) {
         ctx.status = 400
@@ -48,10 +51,12 @@ export const login = async (ctx: Context) => {
         return
     }
 
-    let user: IUser | null = null
+    let user: IUserDocument | null = null
 
     try {
-        user = await UserModel.findSocialId({ id: profile.id })
+        const profileId: string = profile.id
+
+        user = await UserModel.findSocialId(profileId)
     } catch (error) {
         result = {
             ok: false,
@@ -89,7 +94,7 @@ export const login = async (ctx: Context) => {
     } else {
         // 회원가입
         try {
-            const newUser = await new UserModel({
+            const newUser: IUserDocument | null = await new UserModel({
                 email: profile.email,
                 displayName: profile.name,
                 thumbnail: profile.thumbnail,
@@ -97,15 +102,26 @@ export const login = async (ctx: Context) => {
                 socialId: profile.id
             }).save()
 
-            const token = await createJWT(newUser._id)
+            if (newUser) {
+                const token = await createJWT(newUser._id)
 
-            result = {
-                ok: true,
-                error: null,
-                token
+                result = {
+                    ok: true,
+                    error: null,
+                    token
+                }
+
+                ctx.body = result
+            } else {
+                result = {
+                    ok: false,
+                    error: "Register failed. User does not found.",
+                    token: null
+                }
+
+                ctx.status = 404
+                ctx.body = result
             }
-
-            ctx.body = result
         } catch (error) {
             result = {
                 ok: false,
@@ -119,6 +135,9 @@ export const login = async (ctx: Context) => {
     }
 }
 
+/*
+    [POST] /v1.0/auth/login/admin
+*/
 export const adminLogin = async (ctx: Context) => {
     let result: AdminLoginResponse
     const { password } = ctx.request.body

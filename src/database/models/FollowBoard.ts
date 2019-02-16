@@ -1,9 +1,17 @@
-import { Document, model, Schema } from "mongoose"
+import { Document, model, Model, Schema } from "mongoose"
 
-export interface IFollowBoard extends Document {
+export interface IFollowBoardDocument extends Document {
+    _id: Schema.Types.ObjectId
     user: Schema.Types.ObjectId
     previewBoard: Schema.Types.ObjectId
     score: number
+}
+
+export interface IFollowBoardModel extends Model<IFollowBoardDocument> {
+    findList: (
+        query: { user: Schema.Types.ObjectId },
+        page: number
+    ) => IFollowBoardDocument[]
 }
 
 const FollowBoardSchema: Schema = new Schema({
@@ -38,6 +46,7 @@ FollowBoardSchema.statics.findList = function(query, page) {
         .lean()
 }
 
-const FolloBoardwModel: any = model<IFollowBoard>("Follow", FollowBoardSchema)
-
-export default FolloBoardwModel
+export default model<IFollowBoardDocument, IFollowBoardModel>(
+    "FollowBoard",
+    FollowBoardSchema
+)

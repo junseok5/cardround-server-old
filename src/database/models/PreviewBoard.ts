@@ -1,22 +1,14 @@
 import { Document, model, Schema } from "mongoose"
+import { ICardDocument } from "./Board";
 
-export interface ICard {
-    code: string
-    title: string
-    firstAddedInfo?: string
-    secondAddedInfo?: string
-    thumbnail?: string
-    link: string
-    publishedDate: string
-}
-
-export interface IPreviewBoard extends Document {
+export interface IPreviewBoardDocument extends Document {
+    _id: Schema.Types.ObjectId
     board: Schema.Types.ObjectId
     name: string
     link: string
     layoutType: string
     follower: number
-    cards: ICard[]
+    cards: ICardDocument[]
     private: boolean
     createdAt: Date
     updatedAt: Date
@@ -79,9 +71,4 @@ const PreviewBoardSchema: Schema = new Schema({
     }
 })
 
-const PreviewBoardModel: any = model<IPreviewBoard>(
-    "PreviewBoard",
-    PreviewBoardSchema
-)
-
-export default PreviewBoardModel
+export default model<IPreviewBoardDocument>("PreviewBoard", PreviewBoardSchema)

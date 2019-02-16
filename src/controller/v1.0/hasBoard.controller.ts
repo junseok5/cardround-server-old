@@ -1,28 +1,27 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import HasBoardModel, { IHasBoard } from "../../database/models/HasBoard"
-import PreviewBoardModel, {
-    IPreviewBoard
-} from "../../database/models/PreviewBoard"
-import WebsiteModel, { IWebsite } from "../../database/models/Website"
+import HasBoardModel, { IHasBoardDocument } from "../../database/models/HasBoard"
+import PreviewBoardModel, { IPreviewBoardDocument } from "../../database/models/PreviewBoard"
+import WebsiteModel, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ListHasBoardResponse,
     RemoveHasBoardResponse,
     WriteHasBoardResponse
 } from "../../types/types"
 
+/*
+    [GET] /v1.0/has-board/:websiteId
+*/
 export const listHasBoard = async (ctx: Context) => {
     let result: ListHasBoardResponse
     const page = parseInt(ctx.query.page || 1, 10)
     const { websiteId } = ctx.params
 
-    const query = {
-        website: websiteId
-    }
-
     try {
-        const hasBoards: IHasBoard[] = await HasBoardModel.findList(
-            query,
+        const hasBoards: IHasBoardDocument[] = await HasBoardModel.findList(
+            {
+                website: websiteId
+            },
             page
         )
 
@@ -45,6 +44,9 @@ export const listHasBoard = async (ctx: Context) => {
     }
 }
 
+/*
+    [POST] /v1.0/has-board/
+*/
 export const writeHasBoard = async (ctx: Context) => {
     let result: WriteHasBoardResponse
     const { body } = ctx.request
@@ -69,8 +71,8 @@ export const writeHasBoard = async (ctx: Context) => {
 
     const { websiteId, previewBoardId } = body
 
-    let website: IWebsite | null = null
-    let previewBoard: IPreviewBoard | null = null
+    let website: IWebsiteDocument | null = null
+    let previewBoard: IPreviewBoardDocument | null = null
 
     try {
         website = await WebsiteModel.findById(websiteId)
@@ -108,7 +110,7 @@ export const writeHasBoard = async (ctx: Context) => {
         return
     }
 
-    let hasBoard: IHasBoard | null
+    let hasBoard: IHasBoardDocument | null = null
 
     if (previewBoard) {
         try {
@@ -173,11 +175,14 @@ export const writeHasBoard = async (ctx: Context) => {
     }
 }
 
+/*
+    [DELETE] /v1.0/has-board/websites/:websiteId/previewBoards/:previewBoardId
+*/
 export const removeHasBoard = async (ctx: Context) => {
     let result: RemoveHasBoardResponse
     const { websiteId, previewBoardId } = ctx.params
 
-    let hasBoard: IHasBoard | null
+    let hasBoard: IHasBoardDocument | null = null
 
     try {
         hasBoard = await HasBoardModel.findOne({

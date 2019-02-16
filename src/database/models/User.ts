@@ -1,6 +1,7 @@
-import { Document, model, Schema } from "mongoose"
+import { Document, model, Model, Schema } from "mongoose"
 
-export interface IUser extends Document {
+export interface IUserDocument extends Document {
+    _id: Schema.Types.ObjectId
     email: string
     displayName: string
     socialId: string
@@ -8,6 +9,10 @@ export interface IUser extends Document {
     thumbnail: string
     createdAt: Date
     updatedAt: Date
+}
+
+export interface IUserModel extends Model<IUserDocument> {
+    findSocialId: (socialId: string) => IUserDocument
 }
 
 const UserSchema: Schema = new Schema({
@@ -43,10 +48,8 @@ const UserSchema: Schema = new Schema({
     }
 })
 
-UserSchema.statics.findSocialId = function({ id }) {
-    return this.findOne({ socialId: id })
+UserSchema.statics.findSocialId = function(socialId) {
+    return this.findOne({ socialId })
 }
 
-const UserModel: any = model<IUser>("User", UserSchema)
-
-export default UserModel
+export default model<IUserDocument, IUserModel>("User", UserSchema)

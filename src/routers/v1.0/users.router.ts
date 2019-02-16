@@ -4,7 +4,6 @@ import userAuthentication from "../../middlewares/user.authentication"
 
 const router: Router = new Router()
 
-router.get("/users/:id", usersCtrl.getUserInfo)
 router.get("/users/following", userAuthentication, usersCtrl.listFollowBoard)
 router.post(
     "/users/following/:previewBoardId",
@@ -16,5 +15,6 @@ router.delete(
     userAuthentication,
     usersCtrl.unfollowBoard
 )
+router.get("/users/:id", usersCtrl.getUserInfo)
 
 export default router

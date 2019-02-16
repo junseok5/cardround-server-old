@@ -93,13 +93,11 @@ export interface ListHasBoardResponse {
 export interface FollowBoardResponse {
     ok: boolean
     error: error | null
-    followerCount: number | null
 }
 
 export interface UnfollowBoardResponse {
     ok: boolean
     error: error | null
-    followerCount: number | null
 }
 
 export interface ListFollowBoardResponse {

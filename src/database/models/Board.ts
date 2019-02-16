@@ -1,6 +1,6 @@
 import { Document, model, Schema } from "mongoose"
 
-export interface ICard {
+export interface ICardDocument {
     code: string
     title: string
     firstAddedInfo?: string
@@ -10,12 +10,13 @@ export interface ICard {
     publishedDate: string
 }
 
-export interface IBoard extends Document {
+export interface IBoardDocument extends Document {
+    _id: Schema.Types.ObjectId
     name: string
     link: string
     layoutType: string
     follower: number
-    cards: ICard[]
+    cards: ICardDocument[]
     private: boolean
     createdAt: Date
     updatedAt: Date
@@ -73,6 +74,4 @@ const BoardSchema: Schema = new Schema({
     }
 })
 
-const BoardModel: any = model<IBoard>("Board", BoardSchema)
-
-export default BoardModel
+export default model<IBoardDocument>("Board", BoardSchema)

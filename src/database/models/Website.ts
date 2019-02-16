@@ -1,6 +1,7 @@
-import { Document, model, Schema } from "mongoose"
+import { Document, model, Model, Schema } from "mongoose"
 
-export interface IWebsite extends Document {
+export interface IWebsiteDocument extends Document {
+    _id: Schema.Types.ObjectId
     name: string
     thumbnail?: string
     link: string
@@ -9,6 +10,18 @@ export interface IWebsite extends Document {
     private: boolean
     createdAt: Date
     updatedAt: Date
+}
+
+export interface IWebsiteModel extends Model<IWebsiteDocument> {
+    findList: (
+        query: {
+            private?: boolean
+            category?: string
+            keyword?: string
+            name?: object
+        },
+        page: number
+    ) => IWebsiteDocument[]
 }
 
 const WebsiteSchema: Schema = new Schema({
@@ -60,6 +73,4 @@ WebsiteSchema.statics.findList = function(query, page) {
         .lean()
 }
 
-const WebsiteModel: any = model<IWebsite>("Website", WebsiteSchema)
-
-export default WebsiteModel
+export default model<IWebsiteDocument, IWebsiteModel>("Website", WebsiteSchema)

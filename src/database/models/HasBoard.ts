@@ -1,8 +1,18 @@
-import { Document, model, Schema } from "mongoose"
+import { Document, model, Model, Schema } from "mongoose"
 
-export interface IHasBoard extends Document {
+export interface IHasBoardDocument extends Document {
+    _id: Schema.Types.ObjectId
     website: Schema.Types.ObjectId
     previewBoard: Schema.Types.ObjectId
+}
+
+export interface IHasBoardModel extends Model<IHasBoardDocument> {
+    findList: (
+        query: {
+            website: Schema.Types.ObjectId
+        },
+        page: number
+    ) => IHasBoardDocument[]
 }
 
 const HasBoardSchema: Schema = new Schema({
@@ -19,21 +29,17 @@ const HasBoardSchema: Schema = new Schema({
 const NumPerPage = 20
 
 HasBoardSchema.statics.findList = function(query, page) {
-    return (
-        this.find(query, {
-            website: false
+    return this.find(query, {
+        website: false
+    })
+        .sort({ follower: "desc" })
+        .limit((page - 1) * NumPerPage)
+        .populate({
+            path: "previewBoard",
+            model: "PreviewBoard",
+            select: "board name link layoutType cards follower"
         })
-            .sort({ follower: "desc" })
-            .limit((page - 1) * NumPerPage)
-            .populate({
-                path: "previewBoard",
-                model: "PreviewBoard",
-                select: "board name link layoutType cards follower"
-            })
-            .lean()
-    )
+        .lean()
 }
 
-const HasBoardModel: any = model<IHasBoard>("HasBoard", HasBoardSchema)
-
-export default HasBoardModel
+export default model<IHasBoardDocument, IHasBoardModel>("HasBoard", HasBoardSchema)
