@@ -2,6 +2,7 @@ import { IWebsite } from "../database/models/Website";
 import { IUser } from "../database/models/User";
 import { IBoard } from "../database/models/Board";
 import { IHasBoard } from "../database/models/HasBoard";
+import { IFollowBoard } from "../database/models/FollowBoard";
 
 export interface LoginResponse {
     ok: boolean
@@ -99,4 +100,10 @@ export interface UnfollowBoardResponse {
     ok: boolean
     error: error | null
     followerCount: number | null
+}
+
+export interface ListFollowBoardResponse {
+    ok: boolean
+    error: error | null
+    followBoards: IFollowBoard[] | null
 }

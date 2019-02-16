@@ -11,7 +11,8 @@ import WebsiteModel from "../../database/models/Website"
 import {
     FollowBoardResponse,
     GetUserInfoResponse,
-    UnfollowBoardResponse
+    ListFollowBoardResponse,
+    UnfollowBoardResponse,
 } from "../../types/types"
 
 export const getUserInfo = async (ctx: Context) => {
@@ -53,6 +54,39 @@ export const getUserInfo = async (ctx: Context) => {
 
         ctx.status = 500
         ctx.body = result
+    }
+}
+
+export const listFollowBoard = async (ctx: Context) => {
+    let result: ListFollowBoardResponse
+    const page = parseInt(ctx.query.page || 1, 10)
+    const userId: string = ctx.user._id
+
+    let following: IFollowBoard[] | null
+
+    try {
+        following = await FollowBoardModel.findList(
+            {
+                user: userId
+            },
+            page
+        )
+
+        result = {
+            ok: true,
+            error: null,
+            followBoards: following
+        }
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            followBoards: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+        return
     }
 }
 
