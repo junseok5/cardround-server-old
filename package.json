@@ -17,11 +17,11 @@
     "jsonwebtoken": "^8.4.0",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",
+    "koa-logger": "^3.2.0",
     "koa-router": "^7.4.0",
     "koa-session": "^5.10.1",
     "koa-static": "^5.0.0",
-    "mongoose": "^5.4.11",
-    "morgan": "^1.9.1"
+    "mongoose": "^5.4.11"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.3.0",
