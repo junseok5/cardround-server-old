@@ -10,6 +10,9 @@ export interface IPreviewBoardDocument extends Document {
     follower: number
     cards: ICardDocument[]
     private: boolean
+    websiteId: Schema.Types.ObjectId
+    websiteName: string
+    websiteThumbnail?: string
     createdAt: Date
     updatedAt: Date
 }
