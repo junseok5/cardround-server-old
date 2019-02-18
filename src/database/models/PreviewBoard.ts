@@ -1,5 +1,5 @@
-import { Document, model, Schema } from "mongoose"
-import { ICardDocument } from "./Board";
+import { Document, model, Model, Schema } from "mongoose"
+import { ICardDocument } from "./Board"
 
 export interface IPreviewBoardDocument extends Document {
     _id: Schema.Types.ObjectId
@@ -15,6 +15,18 @@ export interface IPreviewBoardDocument extends Document {
     websiteThumbnail?: string
     createdAt: Date
     updatedAt: Date
+}
+
+export interface IPreviewBoardModel extends Model<IPreviewBoardDocument> {
+    findList: (
+        query: {
+            private?: boolean
+            websiteId?: string
+            keyword?: string
+            name?: object
+        },
+        page: number
+    ) => IPreviewBoardDocument[]
 }
 
 const PreviewBoardSchema: Schema = new Schema({
@@ -84,4 +96,19 @@ const PreviewBoardSchema: Schema = new Schema({
     }
 })
 
-export default model<IPreviewBoardDocument>("PreviewBoard", PreviewBoardSchema)
+const NumPerPage = 20
+
+PreviewBoardSchema.statics.findList = function(query, page) {
+    return this.find(query, {
+        createdAt: false,
+        updatedAt: false
+    })
+        .sort({ follower: "desc" })
+        .limit((page - 1) * NumPerPage)
+        .lean()
+}
+
+export default model<IPreviewBoardDocument, IPreviewBoardModel>(
+    "PreviewBoard",
+    PreviewBoardSchema
+)

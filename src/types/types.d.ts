@@ -3,6 +3,7 @@ import { IUser } from "../database/models/User";
 import { IBoard } from "../database/models/Board";
 import { IHasBoard } from "../database/models/HasBoard";
 import { IFollowBoard } from "../database/models/FollowBoard";
+import { IPreviewBoardDocument } from "../database/models/PreviewBoard";
 
 export interface LoginResponse {
     ok: boolean
@@ -74,21 +75,21 @@ export interface UpdateBoardResponse {
     error: error | null
 }
 
-export interface WriteHasBoardResponse {
-    ok: boolean
-    error: error | null
-}
+// export interface WriteHasBoardResponse {
+//     ok: boolean
+//     error: error | null
+// }
 
-export interface RemoveHasBoardResponse {
-    ok: boolean
-    error: error | null
-}
+// export interface RemoveHasBoardResponse {
+//     ok: boolean
+//     error: error | null
+// }
 
-export interface ListHasBoardResponse {
-    ok: boolean
-    error: error | null
-    hasBoards: IHasBoard[] | null
-}
+// export interface ListHasBoardResponse {
+//     ok: boolean
+//     error: error | null
+//     hasBoards: IHasBoard[] | null
+// }
 
 export interface FollowBoardResponse {
     ok: boolean
@@ -104,4 +105,10 @@ export interface ListFollowBoardResponse {
     ok: boolean
     error: error | null
     followBoards: IFollowBoard[] | null
+}
+
+export interface ListPBOfWebResponse {
+    ok: boolean
+    error: error | null
+    previewBoards: IPreviewBoardDocument[] | null
 }
