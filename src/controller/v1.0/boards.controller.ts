@@ -1,7 +1,10 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import BoardModel, { IBoardDocument } from "../../database/models/Board"
-import PreviewBoardModel, { IPreviewBoardDocument } from "../../database/models/PreviewBoard"
+import Board, { IBoardDocument } from "../../database/models/Board"
+import PreviewBoard, {
+    IPreviewBoardDocument
+} from "../../database/models/PreviewBoard"
+import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ReadBoardResponse,
     UpdateBoardResponse,
@@ -23,7 +26,7 @@ export const readBoard = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const board: IBoardDocument | null = await BoardModel.findById(id, {
+        const board: IBoardDocument | null = await Board.findById(id, {
             createdAt: false,
             updatedAt: false
         })
@@ -75,7 +78,8 @@ export const writeBoard = async (ctx: Context) => {
             .regex(
                 /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
             )
-            .required()
+            .required(),
+        websiteId: Joi.string().required()
     })
 
     const validation: ValidationResult<any> = Joi.validate(body, schema)
@@ -91,34 +95,55 @@ export const writeBoard = async (ctx: Context) => {
         return
     }
 
-    const { name, link, layoutType } = body
+    const { name, link, layoutType, websiteId } = body
 
     try {
-        const board: IBoardDocument | null = await new BoardModel({
-            name,
-            link,
-            layoutType
-        }).save()
+        const website: IWebsiteDocument | null = await Website.findById(
+            websiteId
+        )
 
-        if (board) {
-            await new PreviewBoardModel({
-                board: board._id,
+        if (website) {
+            const board: IBoardDocument | null = await new Board({
                 name,
                 link,
-                layoutType
+                layoutType,
+                websiteId,
+                websiteName: website.name,
+                websiteThumbnail: website.thumbnail
             }).save()
-    
-            result = {
-                ok: true,
-                error: null
+
+            if (board) {
+                await new PreviewBoard({
+                    board: board._id,
+                    name,
+                    link,
+                    layoutType,
+                    websiteId,
+                    websiteName: website.name,
+                    websiteThumbnail: website.thumbnail
+                }).save()
+
+                result = {
+                    ok: true,
+                    error: null
+                }
+
+                ctx.body = result
+            } else {
+                result = {
+                    ok: false,
+                    error: "Write board failed. Board does not found."
+                }
             }
-    
-            ctx.body = result
         } else {
             result = {
                 ok: false,
-                error: "Write board failed. Board does not found."
+                error: "Website matched websiteId does not found."
             }
+
+            ctx.status = 404
+            ctx.body = result
+            return
         }
     } catch (error) {
         result = {
@@ -143,7 +168,7 @@ export const updateBoard = async (ctx: Context) => {
     let board: IBoardDocument | null = null
 
     try {
-        previewBoard = await PreviewBoardModel.findById(id)
+        previewBoard = await PreviewBoard.findById(id)
     } catch (error) {
         result = {
             ok: false,
@@ -167,7 +192,7 @@ export const updateBoard = async (ctx: Context) => {
     }
 
     try {
-        board = await BoardModel.findById(previewBoard.board)
+        board = await Board.findById(previewBoard.board)
     } catch (error) {
         result = {
             ok: false,
@@ -193,7 +218,8 @@ export const updateBoard = async (ctx: Context) => {
     const allowedFields = {
         name: true,
         link: true,
-        layoutType: true
+        layoutType: true,
+        websiteId: true
     }
 
     const schema: Schema = Joi.object({
@@ -203,7 +229,8 @@ export const updateBoard = async (ctx: Context) => {
         link: Joi.string(),
         layoutType: Joi.string().regex(
             /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
-        )
+        ),
+        websiteId: Joi.string()
     })
 
     const validation: ValidationResult<any> = Joi.validate(body, schema)
@@ -233,6 +260,24 @@ export const updateBoard = async (ctx: Context) => {
     }
 
     try {
+        const { websiteId } = body
+        if (websiteId) {
+            const website: IWebsiteDocument | null = await Website.findById(websiteId)
+
+            if (website) {
+                body.websiteName = website.name
+                body.websiteThumbnail = website.thumbnail
+            } else {
+                result = {
+                    ok: false,
+                    error: "Website matched websiteId does not found."
+                }
+
+                ctx.status = 404
+                ctx.body = result
+                return
+            }
+        }
         const boardPatchData = {
             ...board.toObject(),
             ...body,

@@ -64,6 +64,16 @@ const BoardSchema: Schema = new Schema({
         type: Boolean,
         default: true
     },
+    websiteId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        index: true
+    },
+    websiteThumbnail: String,
+    websiteName: {
+        type: String,
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now()

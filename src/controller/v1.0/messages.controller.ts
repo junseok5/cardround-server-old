@@ -1,6 +1,6 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import MessageModel, { IMessageDocument } from "../../database/models/Message"
+import Message, { IMessageDocument } from "../../database/models/Message"
 import { SendMessageResponse } from "../../types/types"
 
 /*
@@ -32,7 +32,7 @@ export const sendMessage = async (ctx: Context) => {
     }
 
     try {
-        const newMessage: IMessageDocument | null = await new MessageModel({
+        const newMessage: IMessageDocument | null = await new Message({
             user: user._id,
             content: body.content
         }).save()

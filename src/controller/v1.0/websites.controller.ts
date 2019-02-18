@@ -1,12 +1,16 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import WebsiteModel, { IWebsiteDocument } from "../../database/models/Website"
+import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
     WriteWebsiteResponse
 } from "../../types/types"
+import PreviewBoard, {
+    IPreviewBoardDocument
+} from "../../database/models/PreviewBoard"
+import Board from "../../database/models/Board"
 
 /*
     [GET] /v1.0/websites/
@@ -41,10 +45,7 @@ export const listWebsite = async (ctx: Context) => {
     }
 
     try {
-        const websites: IWebsiteDocument[] = await WebsiteModel.findList(
-            query,
-            page
-        )
+        const websites: IWebsiteDocument[] = await Website.findList(query, page)
 
         result = {
             ok: true,
@@ -73,14 +74,11 @@ export const readWebsite = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const website: IWebsiteDocument | null = await WebsiteModel.findById(
-            id,
-            {
-                createdAt: false,
-                updatedAt: false,
-                category: false
-            }
-        )
+        const website: IWebsiteDocument | null = await Website.findById(id, {
+            createdAt: false,
+            updatedAt: false,
+            category: false
+        })
 
         if (website) {
             result = {
@@ -145,7 +143,7 @@ export const writeWebsite = async (ctx: Context) => {
     const { name, thumbnail, link, category } = body
 
     try {
-        const website: IWebsiteDocument | null = await WebsiteModel.findOne({
+        const website: IWebsiteDocument | null = await Website.findOne({
             $or: [{ name }, { link }]
         })
 
@@ -158,7 +156,7 @@ export const writeWebsite = async (ctx: Context) => {
             ctx.status = 400
             ctx.body = result
         } else {
-            await new WebsiteModel({
+            await new Website({
                 name,
                 thumbnail,
                 link,
@@ -193,7 +191,7 @@ export const updateWebsite = async (ctx: Context) => {
     const { body } = ctx.request
 
     try {
-        const website: IWebsiteDocument | null = await WebsiteModel.findById(id)
+        const website: IWebsiteDocument | null = await Website.findById(id)
 
         if (website) {
             const allowedFields = {
@@ -247,6 +245,36 @@ export const updateWebsite = async (ctx: Context) => {
             }
 
             await website.update({ ...patchData, updatedAt: Date.now() })
+
+            const { name, thumbnail } = body
+
+            if (name || thumbnail) {
+                const previewBoard: IPreviewBoardDocument[] = await PreviewBoard.find(
+                    { websiteId: id }
+                )
+
+                if (previewBoard.length > 0) {
+                    for (const key of Object.keys(previewBoard)) {
+                        const { _id: previewBoardId } = previewBoard[key]
+                        const updatedPreviewBoard: IPreviewBoardDocument | null = await PreviewBoard.findByIdAndUpdate(
+                            previewBoardId,
+                            {
+                                websiteName: name,
+                                websiteThumbnail: thumbnail
+                            }
+                        )
+
+                        if (updatedPreviewBoard) {
+                            const { board: boardId } = updatedPreviewBoard
+
+                            await Board.findByIdAndUpdate(boardId, {
+                                websiteName: name,
+                                websiteThumbnail: thumbnail
+                            })
+                        }
+                    }
+                }
+            }
 
             result = {
                 ok: true,

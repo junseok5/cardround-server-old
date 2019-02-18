@@ -1,20 +1,20 @@
 import { Context } from "koa"
 import { Schema } from "mongoose"
-import BoardModel, { IBoardDocument } from "../../database/models/Board"
-import FollowBoardModel, {
+import Board, { IBoardDocument } from "../../database/models/Board"
+import FollowBoard, {
     IFollowBoardDocument
 } from "../../database/models/FollowBoard"
-import FollowWebsiteModel, {
+import FollowWebsite, {
     IFollowWebsiteDocument
 } from "../../database/models/FollowWebsite"
 import HasBoardModel, {
     IHasBoardDocument
 } from "../../database/models/HasBoard"
-import PreviewBoardModel, {
+import PreviewBoard, {
     IPreviewBoardDocument
 } from "../../database/models/PreviewBoard"
-import UserModel, { IUserDocument } from "../../database/models/User"
-import WebsiteModel from "../../database/models/Website"
+import User, { IUserDocument } from "../../database/models/User"
+import Website from "../../database/models/Website"
 import {
     FollowBoardResponse,
     GetUserInfoResponse,
@@ -30,7 +30,7 @@ export const getUserInfo = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const user: IUserDocument | null = await UserModel.findById(id, {
+        const user: IUserDocument | null = await User.findById(id, {
             socialId: false,
             accessToken: false,
             createdAt: false,
@@ -76,7 +76,7 @@ export const listFollowBoard = async (ctx: Context) => {
     const userId: Schema.Types.ObjectId = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument[] = await FollowBoardModel.findList(
+        const following: IFollowBoardDocument[] = await FollowBoard.findList(
             {
                 user: userId
             },
@@ -112,7 +112,7 @@ export const followBoard = async (ctx: Context) => {
     const userId: string = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument | null = await FollowBoardModel.findOne(
+        const following: IFollowBoardDocument | null = await FollowBoard.findOne(
             {
                 user: userId,
                 previewBoard: previewBoardId
@@ -129,7 +129,7 @@ export const followBoard = async (ctx: Context) => {
             return
         }
 
-        await new FollowBoardModel({
+        await new FollowBoard({
             user: userId,
             previewBoard: previewBoardId
         }).save()
@@ -151,18 +151,18 @@ export const followBoard = async (ctx: Context) => {
         return
     }
 
-    // 보드 팔로우
+    // 보드 팔로워 수 업데이트
     try {
-        const followerCount: number = await FollowBoardModel.countDocuments({
+        const followerCount: number = await FollowBoard.countDocuments({
             previewBoard: previewBoardId
         })
 
-        const previewBoard: IPreviewBoardDocument | null = await PreviewBoardModel.findById(
+        const previewBoard: IPreviewBoardDocument | null = await PreviewBoard.findById(
             previewBoardId
         )
 
         if (previewBoard) {
-            const board: IBoardDocument | null = await BoardModel.findById(
+            const board: IBoardDocument | null = await Board.findById(
                 previewBoard.board
             )
 
@@ -189,14 +189,14 @@ export const followBoard = async (ctx: Context) => {
         throw new Error(error)
     }
 
-    // 웹사이트 팔로우
+    // 웹사이트 팔로우 & 웹사이트 팔로워 수 업데이트
     try {
         const hasBoard: IHasBoardDocument | null = await HasBoardModel.findOne({
             previewBoard: previewBoardId
         })
 
         if (hasBoard) {
-            const followWebsite: IFollowWebsiteDocument | null = await FollowWebsiteModel.findOne(
+            const followWebsite: IFollowWebsiteDocument | null = await FollowWebsite.findOne(
                 {
                     user: userId,
                     website: hasBoard.website
@@ -204,18 +204,18 @@ export const followBoard = async (ctx: Context) => {
             )
 
             if (!followWebsite) {
-                await new FollowWebsiteModel({
+                await new FollowWebsite({
                     user: userId,
                     website: hasBoard.website
                 }).save()
 
-                const followWebsiteCount: number = await FollowWebsiteModel.countDocuments(
+                const followWebsiteCount: number = await FollowWebsite.countDocuments(
                     {
                         website: hasBoard.website
                     }
                 )
 
-                await WebsiteModel.findByIdAndUpdate(hasBoard.website, {
+                await Website.findByIdAndUpdate(hasBoard.website, {
                     follower: followWebsiteCount
                 })
             }
@@ -234,7 +234,7 @@ export const unfollowBoard = async (ctx: Context) => {
     const userId: string = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument | null = await FollowBoardModel.findOne(
+        const following: IFollowBoardDocument | null = await FollowBoard.findOne(
             {
                 user: userId,
                 previewBoard: previewBoardId
@@ -272,16 +272,16 @@ export const unfollowBoard = async (ctx: Context) => {
 
     // 보드 팔로워 수 업데이트
     try {
-        const followerCount: number = await FollowBoardModel.countDocuments({
+        const followerCount: number = await FollowBoard.countDocuments({
             previewBoard: previewBoardId
         })
 
-        const previewBoard: IPreviewBoardDocument | null = await PreviewBoardModel.findById(
+        const previewBoard: IPreviewBoardDocument | null = await PreviewBoard.findById(
             previewBoardId
         )
 
         if (previewBoard) {
-            const board: IBoardDocument | null = await BoardModel.findById(
+            const board: IBoardDocument | null = await Board.findById(
                 previewBoard.board
             )
 
@@ -316,7 +316,7 @@ export const unfollowBoard = async (ctx: Context) => {
                 }
             )
 
-            const followingArray: IFollowBoardDocument[] = await FollowBoardModel.find(
+            const followingArray: IFollowBoardDocument[] = await FollowBoard.find(
                 {
                     user: userId
                 }
@@ -340,18 +340,18 @@ export const unfollowBoard = async (ctx: Context) => {
                 }
             }
 
-            await FollowWebsiteModel.deleteOne({
+            await FollowWebsite.deleteOne({
                 user: userId,
                 website: hasBoard.website
             })
 
-            const websiteCount: number = await FollowWebsiteModel.countDocuments(
+            const websiteCount: number = await FollowWebsite.countDocuments(
                 {
                     website: hasBoard.website
                 }
             )
 
-            await WebsiteModel.findByIdAndUpdate(hasBoard.website, {
+            await Website.findByIdAndUpdate(hasBoard.website, {
                 follower: websiteCount
             })
         }

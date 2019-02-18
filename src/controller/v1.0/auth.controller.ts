@@ -1,6 +1,6 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import UserModel, { IUserDocument } from "../../database/models/User"
+import User, { IUserDocument } from "../../database/models/User"
 import { AdminLoginResponse, LoginResponse } from "../../types/types"
 import createJWT from "../../utils/createJWT"
 import getGoogleProfile from "../../utils/getGoogleProfile"
@@ -56,7 +56,7 @@ export const login = async (ctx: Context) => {
     try {
         const profileId: string = profile.id
 
-        user = await UserModel.findSocialId(profileId)
+        user = await User.findSocialId(profileId)
     } catch (error) {
         result = {
             ok: false,
@@ -94,7 +94,7 @@ export const login = async (ctx: Context) => {
     } else {
         // 회원가입
         try {
-            const newUser: IUserDocument | null = await new UserModel({
+            const newUser: IUserDocument | null = await new User({
                 email: profile.email,
                 displayName: profile.name,
                 thumbnail: profile.thumbnail,
