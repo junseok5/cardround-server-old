@@ -1,5 +1,9 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
+import Board from "../../database/models/Board"
+import PreviewBoard, {
+    IPreviewBoardDocument
+} from "../../database/models/PreviewBoard"
 import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ListWebsiteResponse,
@@ -7,10 +11,6 @@ import {
     UpdateWebsiteResponse,
     WriteWebsiteResponse
 } from "../../types/types"
-import PreviewBoard, {
-    IPreviewBoardDocument
-} from "../../database/models/PreviewBoard"
-import Board from "../../database/models/Board"
 
 /*
     [GET] /v1.0/websites/
