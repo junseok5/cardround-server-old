@@ -1,6 +1,7 @@
 import { Document, model, Schema } from "mongoose"
 
 export interface ICardDocument {
+    _id: Schema.Types.ObjectId
     code: string
     title: string
     firstAddedInfo?: string

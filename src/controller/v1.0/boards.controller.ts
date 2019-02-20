@@ -230,6 +230,7 @@ export const updateBoard = async (ctx: Context) => {
         layoutType: Joi.string().regex(
             /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
         ),
+        private: Joi.boolean(),
         websiteId: Joi.string()
     })
 
