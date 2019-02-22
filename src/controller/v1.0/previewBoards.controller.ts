@@ -8,6 +8,7 @@ export const listPreviewBoard = async (ctx: Context) => {
     let result: ListPBOfWebResponse
     const page = parseInt(ctx.query.page || 1, 10)
     const keyword: string = ctx.query.keyword
+    const category: string = ctx.query.category
     const websiteId: string = ctx.params.websiteId
 
     let query = {}
@@ -21,6 +22,12 @@ export const listPreviewBoard = async (ctx: Context) => {
                   $regex: keyword,
                   $options: "i"
               }
+          }
+        : { ...query }
+    query = category
+        ? {
+              ...query,
+              category
           }
         : { ...query }
 
