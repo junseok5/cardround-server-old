@@ -17,6 +17,7 @@ export interface IBoardDocument extends Document {
     link: string
     layoutType: string
     follower: number
+    category: string
     cards: ICardDocument[]
     private: boolean
     websiteId: Schema.Types.ObjectId
@@ -43,6 +44,10 @@ const BoardSchema: Schema = new Schema({
     follower: {
         type: Number,
         default: 0
+    },
+    category: {
+        type: String,
+        required: true
     },
     cards: [
         {

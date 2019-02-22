@@ -74,9 +74,10 @@ export const writeBoard = async (ctx: Context) => {
             .max(50)
             .required(),
         link: Joi.string().required(),
+        category: Joi.string().required(),
         layoutType: Joi.string()
             .regex(
-                /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
+                /^NEWS_PHOTO|SHOP_PHOTO|CHART|OLD_BOARD$/
             )
             .required(),
         websiteId: Joi.string().required()
@@ -95,7 +96,7 @@ export const writeBoard = async (ctx: Context) => {
         return
     }
 
-    const { name, link, layoutType, websiteId } = body
+    const { name, link, category, layoutType, websiteId } = body
 
     try {
         const website: IWebsiteDocument | null = await Website.findById(
@@ -106,6 +107,7 @@ export const writeBoard = async (ctx: Context) => {
             const board: IBoardDocument | null = await new Board({
                 name,
                 link,
+                category,
                 layoutType,
                 websiteId,
                 websiteName: website.name,
@@ -117,6 +119,7 @@ export const writeBoard = async (ctx: Context) => {
                     board: board._id,
                     name,
                     link,
+                    category,
                     layoutType,
                     websiteId,
                     websiteName: website.name,
@@ -218,6 +221,7 @@ export const updateBoard = async (ctx: Context) => {
     const allowedFields = {
         name: true,
         link: true,
+        category: true,
         layoutType: true,
         websiteId: true
     }
@@ -227,6 +231,7 @@ export const updateBoard = async (ctx: Context) => {
             .min(1)
             .max(50),
         link: Joi.string(),
+        category: Joi.string(),
         layoutType: Joi.string().regex(
             /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
         ),
