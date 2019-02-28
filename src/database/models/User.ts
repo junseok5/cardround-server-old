@@ -4,7 +4,16 @@ export interface IUserDocument extends Document {
     _id: Schema.Types.ObjectId
     email: string
     displayName: string
-    socialId: string
+    social: {
+        facebook: {
+            id: string
+            accessToken: string
+        }
+        google: {
+            id: string
+            accessToken: string
+        }
+    }
     accessToken: string
     thumbnail: string
     createdAt: Date
@@ -12,7 +21,10 @@ export interface IUserDocument extends Document {
 }
 
 export interface IUserModel extends Model<IUserDocument> {
-    findSocialId: (socialId: string) => IUserDocument
+    findProfileId: (query: {
+        provider: string
+        profileId: string
+    }) => IUserDocument
 }
 
 const UserSchema: Schema = new Schema({
@@ -21,16 +33,17 @@ const UserSchema: Schema = new Schema({
         required: true,
         unique: true
     },
+    social: {
+        facebook: {
+            id: String,
+            accessToken: String
+        },
+        google: {
+            id: String,
+            accessToken: String
+        }
+    },
     displayName: {
-        type: String,
-        required: true
-    },
-    socialId: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    accessToken: {
         type: String,
         required: true
     },
@@ -48,8 +61,9 @@ const UserSchema: Schema = new Schema({
     }
 })
 
-UserSchema.statics.findSocialId = function(socialId) {
-    return this.findOne({ socialId })
+UserSchema.statics.findProfileId = function({ provider, profileId }) {
+    const key = `social.${provider}.id`
+    return this.findOne({ [key]: profileId })
 }
 
 export default model<IUserDocument, IUserModel>("User", UserSchema)

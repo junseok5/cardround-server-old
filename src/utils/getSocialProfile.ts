@@ -1,4 +1,17 @@
+import FacebookAPI from "fb"
 import { google } from "googleapis"
+
+const getFacebookProfile = (accessToken: string) => {
+    return FacebookAPI.api("me", {
+        fields: ["name", "email", "picture"],
+        access_token: accessToken
+    }).then(auth => ({
+        id: auth.id,
+        name: auth.name,
+        email: auth.email || null,
+        thumbnail: auth.picture.data.url
+    }))
+}
 
 const getGoogleProfile = (accessToken: string) => {
     const plus = google.plus({
@@ -43,4 +56,13 @@ const getGoogleProfile = (accessToken: string) => {
     })
 }
 
-export default getGoogleProfile
+const getSocialProfile = (provider: string, accessToken: string) => {
+    const getters = {
+        facebook: getFacebookProfile,
+        google: getGoogleProfile
+    }
+
+    return getters[provider](accessToken)
+}
+
+export default getSocialProfile

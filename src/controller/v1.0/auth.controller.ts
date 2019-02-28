@@ -3,7 +3,7 @@ import { Context } from "koa"
 import User, { IUserDocument } from "../../database/models/User"
 import { AdminLoginResponse, LoginResponse } from "../../types/types"
 import createJWT from "../../utils/createJWT"
-import getGoogleProfile from "../../utils/getGoogleProfile"
+import getSocialProfile from "../../utils/getSocialProfile"
 
 /*
     [POST] /v1.0/auth/login
@@ -11,6 +11,7 @@ import getGoogleProfile from "../../utils/getGoogleProfile"
 export const login = async (ctx: Context) => {
     let result: LoginResponse
     const { body } = ctx.request
+    const provider: string = ctx.params.provider
 
     const schema: Schema = Joi.object().keys({
         accessToken: Joi.string().required()
@@ -23,10 +24,12 @@ export const login = async (ctx: Context) => {
         return
     }
 
+    const { accessToken } = body
+
     let profile
 
     try {
-        profile = await getGoogleProfile(body.accessToken)
+        profile = await getSocialProfile(provider, accessToken)
     } catch (error) {
         result = {
             ok: false,
@@ -56,7 +59,7 @@ export const login = async (ctx: Context) => {
     try {
         const profileId: string = profile.id
 
-        user = await User.findSocialId(profileId)
+        user = await User.findProfileId({ provider, profileId })
     } catch (error) {
         result = {
             ok: false,
@@ -98,7 +101,7 @@ export const login = async (ctx: Context) => {
                 email: profile.email,
                 displayName: profile.name,
                 thumbnail: profile.thumbnail,
-                accessToken: body.accessToken,
+                accessToken,
                 socialId: profile.id
             }).save()
 
