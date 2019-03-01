@@ -15,6 +15,7 @@ router.delete(
     userAuthentication,
     usersCtrl.unfollowBoard
 )
+router.get("/users", userAuthentication, usersCtrl.getMyInfo)
 router.get("/users/:id", usersCtrl.getUserInfo)
 
 export default router

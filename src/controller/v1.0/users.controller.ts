@@ -23,6 +23,51 @@ import {
 } from "../../types/types"
 
 /*
+    [GET] /v1.0/users/
+*/
+export const getMyInfo = async (ctx: Context) => {
+    let result: GetUserInfoResponse
+    const { _id } = ctx.user
+
+    try {
+        const user: IUserDocument | null = await User.findById(_id, {
+            social: false,
+            password: false,
+            createdAt: false,
+            updatedAt: false
+        })
+
+        if (user) {
+            result = {
+                ok: true,
+                error: null,
+                user
+            }
+
+            ctx.body = result
+        } else {
+            result = {
+                ok: false,
+                error: "Not found user.",
+                user: null
+            }
+
+            ctx.status = 404
+            ctx.body = result
+        }
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            user: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+/*
     [GET] /v1.0/users/:id/
 */
 export const getUserInfo = async (ctx: Context) => {
@@ -31,8 +76,8 @@ export const getUserInfo = async (ctx: Context) => {
 
     try {
         const user: IUserDocument | null = await User.findById(id, {
-            socialId: false,
-            accessToken: false,
+            social: false,
+            password: false,
             createdAt: false,
             updatedAt: false
         })

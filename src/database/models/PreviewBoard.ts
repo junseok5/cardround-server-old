@@ -10,6 +10,7 @@ export interface IPreviewBoardDocument extends Document {
     follower: number
     category: string
     cards: ICardDocument[]
+    score: number
     private: boolean
     websiteId: Schema.Types.ObjectId
     websiteName: string
@@ -78,6 +79,10 @@ const PreviewBoardSchema: Schema = new Schema({
             publishedDate: String
         }
     ],
+    score: {
+        type: Number,
+        default: 0
+    },
     private: {
         type: Boolean,
         default: true

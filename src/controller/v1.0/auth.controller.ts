@@ -23,10 +23,6 @@ export const localLogin = async (ctx: Context) => {
         password: Joi.string()
             .min(6)
             .max(30)
-            .required(),
-        displayName: Joi.string()
-            .min(1)
-            .max(30)
             .required()
     })
 
@@ -44,7 +40,8 @@ export const localLogin = async (ctx: Context) => {
         return
     }
 
-    const { email, password, displayName } = body
+    const { email, password } = body
+    const displayName = email.split("@")[0]
 
     try {
         const exists: IUserDocument | null = await User.findOne({ email })
