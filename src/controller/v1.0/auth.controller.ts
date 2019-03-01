@@ -1,15 +1,114 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
 import User, { IUserDocument } from "../../database/models/User"
-import { AdminLoginResponse, LoginResponse } from "../../types/types"
+import {
+    AdminLoginResponse,
+    LocalLoginResponse,
+    SocialLoginResponse
+} from "../../types/types"
 import createJWT from "../../utils/createJWT"
 import getSocialProfile from "../../utils/getSocialProfile"
 
 /*
-    [POST] /v1.0/auth/login
+    [POST] /v1.0/auth/login/local
 */
-export const login = async (ctx: Context) => {
-    let result: LoginResponse
+export const localLogin = async (ctx: Context) => {
+    let result: LocalLoginResponse
+    const { body } = ctx.request
+
+    const schema: Schema = Joi.object().keys({
+        email: Joi.string()
+            .email()
+            .required(),
+        password: Joi.string()
+            .min(6)
+            .max(30)
+            .required(),
+        displayName: Joi.string()
+            .min(1)
+            .max(30)
+            .required()
+    })
+
+    const validation: ValidationResult<any> = Joi.validate(body, schema)
+
+    if (validation.error) {
+        result = {
+            ok: false,
+            error: validation.error,
+            token: null
+        }
+
+        ctx.status = 400
+        ctx.body = result
+        return
+    }
+
+    const { email, password, displayName } = body
+
+    try {
+        const exists: IUserDocument | null = await User.findOne({ email })
+
+        if (exists) {
+            // 로그인
+            const validatePassword: boolean = exists.validatePassword(password)
+
+            if (!validatePassword) {
+                result = {
+                    ok: false,
+                    error: "WRONG_PASSWORD",
+                    token: null
+                }
+
+                ctx.status = 401
+                ctx.body = result
+                return
+            }
+
+            const accessToken = await createJWT(exists._id)
+
+            result = {
+                ok: true,
+                error: null,
+                token: accessToken
+            }
+
+            ctx.body = result
+        } else {
+            // 회원가입
+            const newUser = await User.localRegister({
+                email,
+                password,
+                displayName
+            })
+
+            const accessToken = await createJWT(newUser._id)
+
+            result = {
+                ok: true,
+                error: null,
+                token: accessToken
+            }
+
+            ctx.body = result
+        }
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            token: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+/*
+    [POST] /v1.0/auth/login/:provider(facebook)
+*/
+export const socialLogin = async (ctx: Context) => {
+    let result: SocialLoginResponse
     const { body } = ctx.request
     const provider: string = ctx.params.provider
 
@@ -20,7 +119,14 @@ export const login = async (ctx: Context) => {
     const validation: ValidationResult<any> = Joi.validate(body, schema)
 
     if (validation.error) {
+        result = {
+            ok: false,
+            error: validation.error,
+            token: null
+        }
+
         ctx.status = 400
+        ctx.body = result
         return
     }
 
@@ -31,6 +137,7 @@ export const login = async (ctx: Context) => {
     try {
         profile = await getSocialProfile(provider, accessToken)
     } catch (error) {
+        console.error(error)
         result = {
             ok: false,
             error: error.message,
@@ -45,7 +152,7 @@ export const login = async (ctx: Context) => {
     if (!profile) {
         result = {
             ok: false,
-            error: "Could not find google profile.",
+            error: "Could not find social profile.",
             token: null
         }
 
@@ -58,9 +165,9 @@ export const login = async (ctx: Context) => {
 
     try {
         const profileId: string = profile.id
-
         user = await User.findProfileId({ provider, profileId })
     } catch (error) {
+        console.error(error)
         result = {
             ok: false,
             error: error.message,
@@ -84,6 +191,27 @@ export const login = async (ctx: Context) => {
             }
 
             ctx.body = result
+            return
+        } catch (error) {
+            console.error(error)
+            result = {
+                ok: false,
+                error: error.message,
+                token: null
+            }
+
+            ctx.status = 500
+            ctx.body = result
+            return
+        }
+    }
+
+    if (profile.email) {
+        // 회원가입
+        let duplicated: IUserDocument | null
+
+        try {
+            duplicated = await User.findOne({ email: profile.email })
         } catch (error) {
             result = {
                 ok: false,
@@ -93,21 +221,53 @@ export const login = async (ctx: Context) => {
 
             ctx.status = 500
             ctx.body = result
+            return
         }
-    } else {
-        // 회원가입
+
+        if (duplicated) {
+            duplicated.social[provider] = {
+                id: profile.id,
+                accessToken
+            }
+
+            try {
+                await duplicated.save()
+
+                const token = await createJWT(duplicated._id)
+
+                result = {
+                    ok: true,
+                    error: null,
+                    token
+                }
+
+                ctx.body = result
+                return
+            } catch (error) {
+                result = {
+                    ok: false,
+                    error: error.message,
+                    token: null
+                }
+
+                ctx.status = 500
+                ctx.body = result
+                return
+            }
+        }
+
         try {
-            const newUser: IUserDocument | null = await new User({
+            const newUser: IUserDocument | null = await User.socialRegister({
                 email: profile.email,
                 displayName: profile.name,
                 thumbnail: profile.thumbnail,
+                provider,
                 accessToken,
-                socialId: profile.id
-            }).save()
+                profileId: profile.id
+            })
 
             if (newUser) {
                 const token = await createJWT(newUser._id)
-
                 result = {
                     ok: true,
                     error: null,
@@ -126,6 +286,7 @@ export const login = async (ctx: Context) => {
                 ctx.body = result
             }
         } catch (error) {
+            console.error(error)
             result = {
                 ok: false,
                 error: error.message,

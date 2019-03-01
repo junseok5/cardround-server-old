@@ -1,4 +1,5 @@
 import { Document, model, Model, Schema } from "mongoose"
+import hash from "../../utils/hash"
 
 export interface IUserDocument extends Document {
     _id: Schema.Types.ObjectId
@@ -14,15 +15,29 @@ export interface IUserDocument extends Document {
             accessToken: string
         }
     }
-    accessToken: string
-    thumbnail: string
+    accessToken?: string
+    thumbnail?: string
     createdAt: Date
     updatedAt: Date
+    validatePassword(password: string): boolean
 }
 
 export interface IUserModel extends Model<IUserDocument> {
+    localRegister: (params: {
+        email: string
+        password: string
+        displayName: string
+    }) => IUserDocument
     findProfileId: (query: {
         provider: string
+        profileId: string
+    }) => IUserDocument
+    socialRegister: (params: {
+        email: string
+        displayName: string
+        thumbnail: string
+        provider: string
+        accessToken: string
         profileId: string
     }) => IUserDocument
 }
@@ -33,6 +48,7 @@ const UserSchema: Schema = new Schema({
         required: true,
         unique: true
     },
+    password: String,
     social: {
         facebook: {
             id: String,
@@ -47,10 +63,7 @@ const UserSchema: Schema = new Schema({
         type: String,
         required: true
     },
-    thumbnail: {
-        type: String,
-        required: true
-    },
+    thumbnail: String,
     createdAt: {
         type: Date,
         default: Date.now()
@@ -61,9 +74,47 @@ const UserSchema: Schema = new Schema({
     }
 })
 
+UserSchema.statics.localRegister = function({ email, password, displayName }) {
+    const user = new this({
+        email,
+        password: hash(password),
+        displayName
+    })
+
+    return user.save()
+}
+
 UserSchema.statics.findProfileId = function({ provider, profileId }) {
     const key = `social.${provider}.id`
     return this.findOne({ [key]: profileId })
+}
+
+UserSchema.statics.socialRegister = function({
+    email,
+    displayName,
+    thumbnail,
+    provider,
+    accessToken,
+    profileId
+}) {
+    const user = new this({
+        email,
+        displayName,
+        thumbnail,
+        social: {
+            [provider]: {
+                id: profileId,
+                accessToken
+            }
+        }
+    })
+
+    return user.save()
+}
+
+UserSchema.methods.validatePassword = function(password: string) {
+    const hashed = hash(password)
+    return this.password === hashed
 }
 
 export default model<IUserDocument, IUserModel>("User", UserSchema)

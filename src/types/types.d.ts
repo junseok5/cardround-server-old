@@ -1,40 +1,46 @@
-import { IWebsite } from "../database/models/Website";
-import { IUser } from "../database/models/User";
-import { IBoard } from "../database/models/Board";
-import { IHasBoard } from "../database/models/HasBoard";
-import { IFollowBoard } from "../database/models/FollowBoard";
-import { IPreviewBoardDocument } from "../database/models/PreviewBoard";
+import { IWebsite } from "../database/models/Website"
+import { IUser } from "../database/models/User"
+import { IBoard } from "../database/models/Board"
+import { IHasBoard } from "../database/models/HasBoard"
+import { IFollowBoard } from "../database/models/FollowBoard"
+import { IPreviewBoardDocument } from "../database/models/PreviewBoard"
 
-export interface LoginResponse {
+export interface LocalLoginResponse {
     ok: boolean
-    error: string | null
+    error: error | null
+    token: string | null
+}
+
+export interface SocialLoginResponse {
+    ok: boolean
+    error: error | null
     token: string | null
 }
 
 export interface GetUserInfoResponse {
     ok: boolean
-    error: string | null
+    error: error | null
     user: IUser | null
 }
 
 export interface SendMessageResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }
 
 export interface UserAuthenticationResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }
 
 export interface AdminLoginResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }
 
 export interface AdminAuthenticationResponse {
     ok: boolean
-    error: string | null
+    error: error | null
 }
 
 export interface ListWebsiteResponse {
