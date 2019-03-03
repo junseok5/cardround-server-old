@@ -35,7 +35,7 @@ export const listPreviewBoard = async (ctx: Context) => {
         result = {
             ok: false,
             error: "Page must have more than 1",
-            previewBoards: null
+            previewboards: null
         }
 
         ctx.status = 400
@@ -44,7 +44,7 @@ export const listPreviewBoard = async (ctx: Context) => {
     }
 
     try {
-        const previewBoards: IPreviewBoardDocument[] = await PreviewBoard.findList(
+        const previewboards: IPreviewBoardDocument[] = await PreviewBoard.findList(
             query,
             page
         )
@@ -52,7 +52,7 @@ export const listPreviewBoard = async (ctx: Context) => {
         result = {
             ok: true,
             error: null,
-            previewBoards
+            previewboards
         }
 
         ctx.body = result
@@ -60,7 +60,7 @@ export const listPreviewBoard = async (ctx: Context) => {
         result = {
             ok: false,
             error: error.message,
-            previewBoards: null
+            previewboards: null
         }
 
         ctx.status = 500

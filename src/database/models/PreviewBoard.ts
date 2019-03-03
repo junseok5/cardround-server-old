@@ -114,7 +114,7 @@ PreviewBoardSchema.statics.findList = function(query, page) {
         createdAt: false,
         updatedAt: false
     })
-        .sort({ follower: "desc" })
+        .sort({ score: "desc" })
         .limit((page - 1) * NumPerPage)
         .lean()
 }

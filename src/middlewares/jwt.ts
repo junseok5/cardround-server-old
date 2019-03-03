@@ -5,11 +5,7 @@ export default async (ctx: Context, next: () => Promise<any>) => {
     const token = ctx.get('X-JWT')
 
     if (!token) {
-        // ctx.user = 
-        // Test user
-        ctx.user = {
-            _id: "5c681fb079c054df9a1a5b14"
-        }
+        ctx.user = null
         return next()
     }
 

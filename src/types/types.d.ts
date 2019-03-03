@@ -4,6 +4,7 @@ import { IBoard } from "../database/models/Board"
 import { IHasBoard } from "../database/models/HasBoard"
 import { IFollowBoard } from "../database/models/FollowBoard"
 import { IPreviewBoardDocument } from "../database/models/PreviewBoard"
+import { Schema } from "mongoose"
 
 export interface LocalLoginResponse {
     ok: boolean
@@ -81,22 +82,6 @@ export interface UpdateBoardResponse {
     error: error | null
 }
 
-// export interface WriteHasBoardResponse {
-//     ok: boolean
-//     error: error | null
-// }
-
-// export interface RemoveHasBoardResponse {
-//     ok: boolean
-//     error: error | null
-// }
-
-// export interface ListHasBoardResponse {
-//     ok: boolean
-//     error: error | null
-//     hasBoards: IHasBoard[] | null
-// }
-
 export interface FollowBoardResponse {
     ok: boolean
     error: error | null
@@ -116,5 +101,5 @@ export interface ListFollowBoardResponse {
 export interface ListPBOfWebResponse {
     ok: boolean
     error: error | null
-    previewBoards: IPreviewBoardDocument[] | null
+    previewboards: IPreviewBoardDocument[] | null
 }

@@ -73,7 +73,7 @@ export const localLogin = async (ctx: Context) => {
             ctx.body = result
         } else {
             // 회원가입
-            const newUser = await User.localRegister({
+            const newUser: IUserDocument = await User.localRegister({
                 email,
                 password,
                 displayName
@@ -226,6 +226,7 @@ export const socialLogin = async (ctx: Context) => {
                 id: profile.id,
                 accessToken
             }
+            duplicated.thumbnail = profile.thumbnail
 
             try {
                 await duplicated.save()
@@ -265,6 +266,7 @@ export const socialLogin = async (ctx: Context) => {
 
             if (newUser) {
                 const token = await createJWT(newUser._id)
+
                 result = {
                     ok: true,
                     error: null,
