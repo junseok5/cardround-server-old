@@ -202,7 +202,7 @@ export const updateWebsite = async (ctx: Context) => {
                 private: true
             }
 
-            const schema: Schema = Joi.object({
+            const schema: Schema = Joi.object().keys({
                 name: Joi.string()
                     .min(1)
                     .max(50),
@@ -244,7 +244,7 @@ export const updateWebsite = async (ctx: Context) => {
                 updatedAt: Date.now()
             }
 
-            await website.update({ ...patchData, updatedAt: Date.now() })
+            await website.update({ ...patchData })
 
             const { name, thumbnail } = body
 

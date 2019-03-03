@@ -5,6 +5,7 @@ import { IHasBoard } from "../database/models/HasBoard"
 import { IFollowBoard } from "../database/models/FollowBoard"
 import { IPreviewBoardDocument } from "../database/models/PreviewBoard"
 import { Schema } from "mongoose"
+import { ICategoryDocument } from "../database/models/Category";
 
 export interface LocalLoginResponse {
     ok: boolean
@@ -102,4 +103,20 @@ export interface ListPBOfWebResponse {
     ok: boolean
     error: error | null
     previewboards: IPreviewBoardDocument[] | null
+}
+
+export interface WriteCategoryResponse {
+    ok: boolean
+    error: error | null
+}
+
+export interface UpdateCategoryResponse {
+    ok: boolean
+    error: error | null
+}
+
+export interface ListCategoryResponse {
+    ok: boolean
+    error: error | null
+    categories: ICategoryDocument[] | null
 }
