@@ -37,7 +37,8 @@ const NumPerPage = 20
 FollowBoardSchema.statics.findList = function(query, page) {
     return this.find(query)
         .sort({ score: "desc" })
-        .limit((page - 1) * NumPerPage)
+        .limit(NumPerPage)
+        .skip((page - 1) * NumPerPage)
         .populate({
             path: "previewBoard",
             model: "PreviewBoard",

@@ -6,6 +6,9 @@ import {
     WriteCategoryResponse
 } from "../../types/types"
 
+/*
+    [GET] /v1.0/categories
+*/
 export const listCategory = async (ctx: Context) => {
     let result: ListCategoryResponse
     const type: string = ctx.query.type
@@ -32,6 +35,9 @@ export const listCategory = async (ctx: Context) => {
     }
 }
 
+/*
+    [POST] /v1.0/categories
+*/
 export const writeCategory = async (ctx: Context) => {
     let result: WriteCategoryResponse
     const { body } = ctx.request
@@ -101,6 +107,9 @@ export const writeCategory = async (ctx: Context) => {
     }
 }
 
+/*
+    [PATCH] /v1.0/categories/:id
+*/
 export const updateCategory = async (ctx: Context) => {
     let result: UpdateCategoryResponse
     const { id } = ctx.params
