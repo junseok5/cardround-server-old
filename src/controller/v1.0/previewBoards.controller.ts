@@ -9,27 +9,27 @@ export const listPreviewBoard = async (ctx: Context) => {
     const page = parseInt(ctx.query.page || 1, 10)
     const keyword: string = ctx.query.keyword
     const category: string = ctx.query.category
-    const websiteId: string = ctx.params.websiteId
+    const websiteId: string = ctx.query.websiteId
 
     let query = {}
     const baseQuery = { private: false }
 
-    query = websiteId ? { ...baseQuery, websiteId } : { ...baseQuery }
-    query = keyword
+    query = websiteId
+        ? { ...baseQuery, websiteId }
+        : keyword
         ? {
-              ...query,
+              ...baseQuery,
               name: {
                   $regex: keyword,
                   $options: "i"
               }
           }
-        : { ...query }
-    query = category
+        : category
         ? {
-              ...query,
+              ...baseQuery,
               category
           }
-        : { ...query }
+        : { ...baseQuery }
 
     if (page < 1) {
         result = {

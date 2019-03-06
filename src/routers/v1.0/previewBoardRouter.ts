@@ -3,9 +3,6 @@ import * as previewBoardCtrl from "../../controller/v1.0/previewBoards.controlle
 
 const router: Router = new Router()
 
-router.get(
-    "/previewboards/websites/:websiteId",
-    previewBoardCtrl.listPreviewBoard
-)
+router.get("/previewboards", previewBoardCtrl.listPreviewBoard)
 
 export default router

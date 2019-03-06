@@ -1,11 +1,11 @@
-import { IWebsite } from "../database/models/Website"
+import { IWebsite, IWebsiteDocument } from "../database/models/Website"
 import { IUser } from "../database/models/User"
 import { IBoard } from "../database/models/Board"
 import { IHasBoard } from "../database/models/HasBoard"
 import { IFollowBoard } from "../database/models/FollowBoard"
 import { IPreviewBoardDocument } from "../database/models/PreviewBoard"
 import { Schema } from "mongoose"
-import { ICategoryDocument } from "../database/models/Category";
+import { ICategoryDocument } from "../database/models/Category"
 
 export interface LocalLoginResponse {
     ok: boolean
@@ -119,4 +119,10 @@ export interface ListCategoryResponse {
     ok: boolean
     error: error | null
     categories: ICategoryDocument[] | null
+}
+
+export interface GetWebsitePreviewList {
+    ok: boolean
+    error: error | null
+    websites: IWebsiteDocument[] | null
 }

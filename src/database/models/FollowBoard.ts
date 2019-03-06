@@ -35,7 +35,9 @@ const FollowBoardSchema: Schema = new Schema({
 const NumPerPage = 20
 
 FollowBoardSchema.statics.findList = function(query, page) {
-    return this.find(query)
+    return this.find(query, {
+        user: false
+    })
         .sort({ score: "desc" })
         .limit(NumPerPage)
         .skip((page - 1) * NumPerPage)

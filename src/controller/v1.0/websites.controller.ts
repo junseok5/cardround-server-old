@@ -6,6 +6,7 @@ import PreviewBoard, {
 } from "../../database/models/PreviewBoard"
 import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
+    GetWebsitePreviewList,
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
@@ -21,17 +22,6 @@ export const listWebsite = async (ctx: Context) => {
     const category: string = ctx.query.category
     const keyword: string = ctx.query.keyword
 
-    let query = {}
-    const baseQuery = { private: false }
-
-    query = category ? { ...baseQuery, category } : { ...baseQuery }
-    query = keyword
-        ? {
-              ...query,
-              name: { $regex: keyword, $options: "i" }
-          }
-        : { ...query }
-
     if (page < 1) {
         result = {
             ok: false,
@@ -44,8 +34,52 @@ export const listWebsite = async (ctx: Context) => {
         return
     }
 
+    let query = {}
+    const baseQuery = { private: false }
+
+    query = category ? { ...baseQuery, category } : { ...baseQuery }
+    query = keyword
+        ? {
+              ...query,
+              name: { $regex: keyword, $options: "i" }
+          }
+        : { ...query }
+
     try {
         const websites: IWebsiteDocument[] = await Website.findList(query, page)
+
+        result = {
+            ok: true,
+            error: null,
+            websites
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            websites: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+/*
+    [GET] /v1.0/websites/search/preview
+*/
+export const getWebsitePreviewList = async (ctx: Context) => {
+    let result: GetWebsitePreviewList
+    const keyword: string = ctx.query.keyword
+
+    const query = { private: false, name: { $regex: keyword, $options: "i" } }
+
+    try {
+        const websites: IWebsiteDocument[] = await Website.findSearchPreviewList(
+            query
+        )
 
         result = {
             ok: true,

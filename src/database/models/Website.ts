@@ -17,11 +17,14 @@ export interface IWebsiteModel extends Model<IWebsiteDocument> {
         query: {
             private?: boolean
             category?: string
-            keyword?: string
             name?: object
         },
         page: number
     ) => IWebsiteDocument[]
+    findSearchPreviewList: (query: {
+        private: boolean
+        name: object
+    }) => IWebsiteDocument[]
 }
 
 const WebsiteSchema: Schema = new Schema({
@@ -61,16 +64,33 @@ const WebsiteSchema: Schema = new Schema({
 })
 
 const NumPerPage = 20
+const previewNum = 4
 
 WebsiteSchema.statics.findList = function(query, page) {
     return this.find(query, {
         category: false,
+        private: false,
         createdAt: false,
         updatedAt: false
     })
         .sort({ follower: "desc" })
         .limit(NumPerPage)
         .skip((page - 1) * NumPerPage)
+        .lean()
+}
+
+WebsiteSchema.statics.findSearchPreviewList = function(query) {
+    return this.find(query, {
+        thumbnail: false,
+        link: false,
+        category: false,
+        follower: false,
+        private: false,
+        createdAt: false,
+        updatedAt: false
+    })
+        .sort({ follower: "desc" })
+        .limit(previewNum)
         .lean()
 }
 
