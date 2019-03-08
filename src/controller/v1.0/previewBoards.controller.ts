@@ -2,7 +2,7 @@ import { Context } from "koa"
 import PreviewBoard, {
     IPreviewBoardDocument
 } from "../../database/models/PreviewBoard"
-import { ListPBOfWebResponse } from "../../types/types"
+import { ListPBOfWebResponse, ListPreviewboardPreview } from "../../types/types"
 
 export const listPreviewBoard = async (ctx: Context) => {
     let result: ListPBOfWebResponse
@@ -47,6 +47,36 @@ export const listPreviewBoard = async (ctx: Context) => {
         const previewboards: IPreviewBoardDocument[] = await PreviewBoard.findList(
             query,
             page
+        )
+
+        result = {
+            ok: true,
+            error: null,
+            previewboards
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            previewboards: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+export const listPreview = async (ctx: Context) => {
+    let result: ListPreviewboardPreview
+    const keyword: string = ctx.query.keyword
+
+    const query = { private: false, name: { $regex: keyword, $options: "i" } }
+
+    try {
+        const previewboards: IPreviewBoardDocument[] = await PreviewBoard.findSearchPreviewList(
+            query
         )
 
         result = {

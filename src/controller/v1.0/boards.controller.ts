@@ -76,9 +76,7 @@ export const writeBoard = async (ctx: Context) => {
         link: Joi.string().required(),
         category: Joi.string().required(),
         layoutType: Joi.string()
-            .regex(
-                /^NEWS_PHOTO|SHOP_PHOTO|CHART|OLD_BOARD$/
-            )
+            .regex(/^NEWS_PHOTO|SHOP_PHOTO|MOVIE_CHART|MUSIC_CHART|OLD_BOARD$/)
             .required(),
         websiteId: Joi.string().required()
     })
@@ -233,7 +231,7 @@ export const updateBoard = async (ctx: Context) => {
         link: Joi.string(),
         category: Joi.string(),
         layoutType: Joi.string().regex(
-            /^PHOTO_NORMAL|CHART|TEXT_VERTICAL_2|TEXT_VERTICAL_3|TEXT_NORMAL$/
+            /^NEWS_PHOTO|SHOP_PHOTO|MOVIE_CHART|MUSIC_CHART|OLD_BOARD$/
         ),
         private: Joi.boolean(),
         websiteId: Joi.string()
@@ -268,7 +266,9 @@ export const updateBoard = async (ctx: Context) => {
     try {
         const { websiteId } = body
         if (websiteId) {
-            const website: IWebsiteDocument | null = await Website.findById(websiteId)
+            const website: IWebsiteDocument | null = await Website.findById(
+                websiteId
+            )
 
             if (website) {
                 body.websiteName = website.name

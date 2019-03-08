@@ -29,6 +29,10 @@ export interface IPreviewBoardModel extends Model<IPreviewBoardDocument> {
         },
         page: number
     ) => IPreviewBoardDocument[]
+    findSearchPreviewList: (query: {
+        private: boolean
+        name: object
+    }) => IPreviewBoardDocument[]
 }
 
 const PreviewBoardSchema: Schema = new Schema({
@@ -108,6 +112,7 @@ const PreviewBoardSchema: Schema = new Schema({
 })
 
 const NumPerPage = 20
+const previewNum = 4
 
 PreviewBoardSchema.statics.findList = function(query, page) {
     return this.find(query, {
@@ -117,6 +122,26 @@ PreviewBoardSchema.statics.findList = function(query, page) {
         .sort({ score: "desc" })
         .limit(NumPerPage)
         .skip((page - 1) * NumPerPage)
+        .lean()
+}
+
+PreviewBoardSchema.statics.findSearchPreviewList = function(query) {
+    return this.find(query, {
+        board: false,
+        link: false,
+        layoutType: false,
+        follower: false,
+        category: false,
+        cards: false,
+        score: false,
+        private: false,
+        websiteId: false,
+        websiteThumbnail: false,
+        createdAt: false,
+        updatedAt: false
+    })
+        .sort({ follower: "desc" })
+        .limit(previewNum)
         .lean()
 }
 

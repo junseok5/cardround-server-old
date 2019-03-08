@@ -121,8 +121,14 @@ export interface ListCategoryResponse {
     categories: ICategoryDocument[] | null
 }
 
-export interface GetWebsitePreviewList {
+export interface ListWebsitePreview {
     ok: boolean
     error: error | null
     websites: IWebsiteDocument[] | null
+}
+
+export interface ListPreviewboardPreview {
+    ok: boolean
+    error: error | null
+    previewboards: IPreviewBoardDocument[] | null
 }

@@ -6,11 +6,11 @@ import PreviewBoard, {
 } from "../../database/models/PreviewBoard"
 import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
-    GetWebsitePreviewList,
+    ListWebsitePreview,
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
-    WriteWebsiteResponse
+    WriteWebsiteResponse,
 } from "../../types/types"
 
 /*
@@ -70,8 +70,8 @@ export const listWebsite = async (ctx: Context) => {
 /*
     [GET] /v1.0/websites/search/preview
 */
-export const getWebsitePreviewList = async (ctx: Context) => {
-    let result: GetWebsitePreviewList
+export const listPreview = async (ctx: Context) => {
+    let result: ListWebsitePreview
     const keyword: string = ctx.query.keyword
 
     const query = { private: false, name: { $regex: keyword, $options: "i" } }
