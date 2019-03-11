@@ -27,8 +27,7 @@ export const readBoard = async (ctx: Context) => {
 
     try {
         const board: IBoardDocument | null = await Board.findById(id, {
-            createdAt: false,
-            updatedAt: false
+            cards: true
         })
 
         if (board) {

@@ -126,20 +126,7 @@ PreviewBoardSchema.statics.findList = function(query, page) {
 }
 
 PreviewBoardSchema.statics.findSearchPreviewList = function(query) {
-    return this.find(query, {
-        board: false,
-        link: false,
-        layoutType: false,
-        follower: false,
-        category: false,
-        cards: false,
-        score: false,
-        private: false,
-        websiteId: false,
-        websiteThumbnail: false,
-        createdAt: false,
-        updatedAt: false
-    })
+    return this.find(query, { name: true })
         .sort({ follower: "desc" })
         .limit(previewNum)
         .lean()

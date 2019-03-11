@@ -80,15 +80,7 @@ WebsiteSchema.statics.findList = function(query, page) {
 }
 
 WebsiteSchema.statics.findSearchPreviewList = function(query) {
-    return this.find(query, {
-        thumbnail: false,
-        link: false,
-        category: false,
-        follower: false,
-        private: false,
-        createdAt: false,
-        updatedAt: false
-    })
+    return this.find(query, { name: true })
         .sort({ follower: "desc" })
         .limit(previewNum)
         .lean()

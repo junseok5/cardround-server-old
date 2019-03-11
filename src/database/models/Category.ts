@@ -27,7 +27,7 @@ const CategorySchema: Schema = new Schema({
 })
 
 CategorySchema.statics.findList = function(type) {
-    return this.find({ type })
+    return this.find({ type }, { type: false })
         .sort({ score: "desc" })
         .lean()
 }
