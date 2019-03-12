@@ -7,12 +7,6 @@ import FollowBoard, {
 import FollowWebsite, {
     IFollowWebsiteDocument
 } from "../../database/models/FollowWebsite"
-// import HasBoardModel, {
-//     IHasBoardDocument
-// } from "../../database/models/HasBoard"
-import PreviewBoard, {
-    IPreviewBoardDocument
-} from "../../database/models/PreviewBoard"
 import User, { IUserDocument } from "../../database/models/User"
 import Website from "../../database/models/Website"
 import {
@@ -68,7 +62,7 @@ export const getMyInfo = async (ctx: Context) => {
 }
 
 /*
-    [GET] /v1.0/users/:id/
+    [GET] /v1.0/users/:id
 */
 export const getUserInfo = async (ctx: Context) => {
     let result: GetUserInfoResponse
@@ -113,7 +107,7 @@ export const getUserInfo = async (ctx: Context) => {
 }
 
 /*
-    [GET] /v1.0/users/following/
+    [GET] /v1.0/users/following
 */
 export const listFollowBoard = async (ctx: Context) => {
     let result: ListFollowBoardResponse
@@ -149,18 +143,18 @@ export const listFollowBoard = async (ctx: Context) => {
 }
 
 /*
-    [POST] /v1.0/users/following/:previewBoardId
+    [POST] /v1.0/users/following/:boardId
 */
 export const followBoard = async (ctx: Context) => {
     let result: FollowBoardResponse
-    const { previewBoardId } = ctx.params
+    const { boardId } = ctx.params
     const userId: string = ctx.user._id
 
     try {
         const following: IFollowBoardDocument | null = await FollowBoard.findOne(
             {
                 user: userId,
-                previewBoard: previewBoardId
+                board: boardId
             }
         )
 
@@ -176,7 +170,7 @@ export const followBoard = async (ctx: Context) => {
 
         await new FollowBoard({
             user: userId,
-            previewBoard: previewBoardId
+            board: boardId
         }).save()
 
         result = {
@@ -198,62 +192,45 @@ export const followBoard = async (ctx: Context) => {
 
     try {
         const followerCount: number = await FollowBoard.countDocuments({
-            previewBoard: previewBoardId
+            board: boardId
         })
 
-        const previewBoard: IPreviewBoardDocument | null = await PreviewBoard.findById(
-            previewBoardId
-        )
+        const board: IBoardDocument | null = await Board.findById(boardId)
 
-        if (previewBoard) {
-            const board: IBoardDocument | null = await Board.findById(
-                previewBoard.board
+        if (board) {
+            const patchData = {
+                ...board.toObject(),
+                follower: followerCount
+            }
+
+            await board.update({
+                ...patchData
+            })
+
+            // 웹사이트 팔로우 & 웹사이트 팔로우 수 업데이트
+            const { websiteId } = board
+            const followWebsite: IFollowWebsiteDocument | null = await FollowWebsite.findOne(
+                {
+                    user: userId,
+                    website: websiteId
+                }
             )
 
-            if (board) {
-                // 보드 팔로워 수 업데이트
-                const previewBoardPatchData = {
-                    ...previewBoard.toObject(),
-                    follower: followerCount
-                }
-                const boardPatchData = {
-                    ...board.toObject(),
-                    follower: followerCount
-                }
+            if (!followWebsite) {
+                await new FollowWebsite({
+                    user: userId,
+                    website: websiteId
+                }).save()
 
-                await previewBoard.update({
-                    ...previewBoardPatchData
-                })
-
-                await board.update({
-                    ...boardPatchData
-                })
-
-                // 웹사이트 팔로우 & 웹사이트 팔로우 수 업데이트
-                const { websiteId } = board
-                const followWebsite: IFollowWebsiteDocument | null = await FollowWebsite.findOne(
+                const followWebsiteCount: number = await FollowWebsite.countDocuments(
                     {
-                        user: userId,
                         website: websiteId
                     }
                 )
 
-                if (!followWebsite) {
-                    await new FollowWebsite({
-                        user: userId,
-                        website: websiteId
-                    }).save()
-
-                    const followWebsiteCount: number = await FollowWebsite.countDocuments(
-                        {
-                            website: websiteId
-                        }
-                    )
-
-                    await Website.findByIdAndUpdate(websiteId, {
-                        follower: followWebsiteCount
-                    })
-                }
+                await Website.findByIdAndUpdate(websiteId, {
+                    follower: followWebsiteCount
+                })
             }
         }
     } catch (error) {
@@ -262,18 +239,18 @@ export const followBoard = async (ctx: Context) => {
 }
 
 /*
-    [DELETE] /v1.0/users/following/:previewBoardId
+    [DELETE] /v1.0/users/following/:boardId
 */
 export const unfollowBoard = async (ctx: Context) => {
     let result: UnfollowBoardResponse
-    const { previewBoardId } = ctx.params
+    const { boardId } = ctx.params
     const userId: string = ctx.user._id
 
     try {
         const following: IFollowBoardDocument | null = await FollowBoard.findOne(
             {
                 user: userId,
-                previewBoard: previewBoardId
+                board: boardId
             }
         )
 
@@ -308,78 +285,58 @@ export const unfollowBoard = async (ctx: Context) => {
 
     try {
         const followerCount: number = await FollowBoard.countDocuments({
-            previewBoard: previewBoardId
+            board: boardId
         })
 
-        const previewBoard: IPreviewBoardDocument | null = await PreviewBoard.findById(
-            previewBoardId
-        )
+        const board: IBoardDocument | null = await Board.findById(boardId)
 
-        if (previewBoard) {
-            const board: IBoardDocument | null = await Board.findById(
-                previewBoard.board
+        if (board) {
+            // 보드 팔로워 수 업데이트
+            const patchData = {
+                ...board.toObject(),
+                follower: followerCount
+            }
+
+            await board.update({ ...patchData })
+
+            //  웹사이트 언팔로우 & 웹사이트 팔로워 수 업데이트
+            const { websiteId } = board
+
+            const allOfBoardsInWebsite: IBoardDocument[] = await Board.find({
+                websiteId
+            })
+
+            const followingBoards: IFollowBoardDocument[] = await FollowBoard.find(
+                {
+                    user: userId
+                }
             )
 
-            if (board) {
-                // 보드 팔로워 수 업데이트
-                const previewBoardPatchData = {
-                    ...previewBoard.toObject(),
-                    follower: followerCount
-                }
-                const boardPatchData = {
-                    ...board.toObject(),
-                    follower: followerCount
-                }
+            if (followingBoards.length > 0) {
+                for (const boardKey of Object.keys(allOfBoardsInWebsite)) {
+                    for (const fbKey of Object.keys(followingBoards)) {
+                        const boardIdOfWeb = allOfBoardsInWebsite[boardKey]._id
+                        const boardIdOfFB = followingBoards[fbKey].previewBoard
 
-                await previewBoard.update({ ...previewBoardPatchData })
-                await board.update({ ...boardPatchData })
-
-                //  웹사이트 언팔로우 & 웹사이트 팔로워 수 업데이트
-                const { websiteId } = previewBoard
-
-                const allOfPreviewBoardsInWebsite: IBoardDocument[] = await PreviewBoard.find(
-                    {
-                        websiteId
-                    }
-                )
-
-                const followingBoards: IFollowBoardDocument[] = await FollowBoard.find(
-                    {
-                        user: userId
-                    }
-                )
-
-                if (followingBoards.length > 0) {
-                    for (const pbKey of Object.keys(
-                        allOfPreviewBoardsInWebsite
-                    )) {
-                        for (const fbKey of Object.keys(followingBoards)) {
-                            const pbIdOfWeb =
-                                allOfPreviewBoardsInWebsite[pbKey]._id
-                            const pbIdOfFB = followingBoards[fbKey].previewBoard
-
-                            if (pbIdOfWeb.equals(pbIdOfFB)) {
-                                return
-                            }
+                        if (boardIdOfWeb.equals(boardIdOfFB)) {
+                            return
                         }
                     }
                 }
-
-                await FollowWebsite.deleteOne({
-                    user: userId,
-                    website: websiteId
-                })
-
-                const websiteCount: number = await FollowWebsite.countDocuments(
-                    {
-                        website: websiteId
-                    }
-                )
-
-                await Website.findByIdAndUpdate(websiteId, {
-                    follower: websiteCount
-                })
             }
+
+            await FollowWebsite.deleteOne({
+                user: userId,
+                website: websiteId
+            })
+
+            const websiteCount: number = await FollowWebsite.countDocuments({
+                website: websiteId
+            })
+
+            await Website.findByIdAndUpdate(websiteId, {
+                follower: websiteCount
+            })
         }
     } catch (error) {
         throw new Error(error)

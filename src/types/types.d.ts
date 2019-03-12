@@ -1,9 +1,7 @@
-import { IWebsite, IWebsiteDocument } from "../database/models/Website"
-import { IUser } from "../database/models/User"
-import { IBoard } from "../database/models/Board"
-import { IHasBoard } from "../database/models/HasBoard"
-import { IFollowBoard } from "../database/models/FollowBoard"
-import { IPreviewBoardDocument } from "../database/models/PreviewBoard"
+import { IWebsiteDocument } from "../database/models/Website"
+import { IUserDocument } from "../database/models/User"
+import { IFollowBoardDocument } from "../database/models/FollowBoard"
+import { IBoardDocument } from "../database/models/Board"
 import { Schema } from "mongoose"
 import { ICategoryDocument } from "../database/models/Category"
 
@@ -22,7 +20,7 @@ export interface SocialLoginResponse {
 export interface GetUserInfoResponse {
     ok: boolean
     error: error | null
-    user: IUser | null
+    user: IUserDocument | null
 }
 
 export interface SendMessageResponse {
@@ -48,13 +46,13 @@ export interface AdminAuthenticationResponse {
 export interface ListWebsiteResponse {
     ok: boolean
     error: error | null
-    websites: IWebsite[] | null
+    websites: IWebsiteDocument[] | null
 }
 
 export interface ReadWebsiteResponse {
     ok: boolean
     error: error | null
-    website: IWebsite | null
+    website: IWebsiteDocument | null
 }
 
 export interface WriteWebsiteResponse {
@@ -96,13 +94,19 @@ export interface UnfollowBoardResponse {
 export interface ListFollowBoardResponse {
     ok: boolean
     error: error | null
-    followBoards: IFollowBoard[] | null
+    followBoards: IFollowBoardDocument[] | null
 }
 
-export interface ListPBOfWebResponse {
+export interface ListBoardResponse {
     ok: boolean
     error: error | null
-    previewboards: IPreviewBoardDocument[] | null
+    boards: IBoardDocument[] | null
+}
+
+export interface ListBoardPreview {
+    ok: boolean
+    error: error | null
+    boards: IBoardDocument[] | null
 }
 
 export interface WriteCategoryResponse {
@@ -125,10 +129,4 @@ export interface ListWebsitePreview {
     ok: boolean
     error: error | null
     websites: IWebsiteDocument[] | null
-}
-
-export interface ListPreviewboardPreview {
-    ok: boolean
-    error: error | null
-    previewboards: IPreviewBoardDocument[] | null
 }

@@ -6,12 +6,12 @@ const router: Router = new Router()
 
 router.get("/users/following", userAuthentication, usersCtrl.listFollowBoard)
 router.post(
-    "/users/following/:previewBoardId",
+    "/users/following/:boardId",
     userAuthentication,
     usersCtrl.followBoard
 )
 router.delete(
-    "/users/following/:previewBoardId",
+    "/users/following/:boardId",
     userAuthentication,
     usersCtrl.unfollowBoard
 )

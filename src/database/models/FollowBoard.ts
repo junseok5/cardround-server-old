@@ -3,7 +3,7 @@ import { Document, model, Model, Schema } from "mongoose"
 export interface IFollowBoardDocument extends Document {
     _id: Schema.Types.ObjectId
     user: Schema.Types.ObjectId
-    previewBoard: Schema.Types.ObjectId
+    board: Schema.Types.ObjectId
     score: number
 }
 
@@ -21,9 +21,9 @@ const FollowBoardSchema: Schema = new Schema({
         required: true,
         index: true
     },
-    previewBoard: {
+    board: {
         type: Schema.Types.ObjectId,
-        ref: "PreviewBoard",
+        ref: "Board",
         required: true
     },
     score: {
@@ -42,9 +42,9 @@ FollowBoardSchema.statics.findList = function(query, page) {
         .limit(NumPerPage)
         .skip((page - 1) * NumPerPage)
         .populate({
-            path: "previewBoard",
-            model: "PreviewBoard",
-            select: "board name link layoutType cards"
+            path: "board",
+            model: "Board",
+            select: "name link layoutType cards websiteThumbnail websiteName"
         })
         .lean()
 }

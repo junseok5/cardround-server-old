@@ -1,16 +1,13 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
-import Board from "../../database/models/Board"
-import PreviewBoard, {
-    IPreviewBoardDocument
-} from "../../database/models/PreviewBoard"
+import Board, { IBoardDocument } from "../../database/models/Board"
 import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
     ListWebsitePreview,
     ListWebsiteResponse,
     ReadWebsiteResponse,
     UpdateWebsiteResponse,
-    WriteWebsiteResponse,
+    WriteWebsiteResponse
 } from "../../types/types"
 
 /*
@@ -283,29 +280,17 @@ export const updateWebsite = async (ctx: Context) => {
             const { name, thumbnail } = body
 
             if (name || thumbnail) {
-                const previewBoard: IPreviewBoardDocument[] = await PreviewBoard.find(
-                    { websiteId: id }
-                )
+                const board: IBoardDocument[] = await Board.find({
+                    websiteId: id
+                })
 
-                if (previewBoard.length > 0) {
-                    for (const key of Object.keys(previewBoard)) {
-                        const { _id: previewBoardId } = previewBoard[key]
-                        const updatedPreviewBoard: IPreviewBoardDocument | null = await PreviewBoard.findByIdAndUpdate(
-                            previewBoardId,
-                            {
-                                websiteName: name,
-                                websiteThumbnail: thumbnail
-                            }
-                        )
-
-                        if (updatedPreviewBoard) {
-                            const { board: boardId } = updatedPreviewBoard
-
-                            await Board.findByIdAndUpdate(boardId, {
-                                websiteName: name,
-                                websiteThumbnail: thumbnail
-                            })
-                        }
+                if (board.length > 0) {
+                    for (const key of Object.keys(board)) {
+                        const { _id: boardId } = board[key]
+                        await Board.findByIdAndUpdate(boardId, {
+                            websiteName: name,
+                            websiteThumbnail: thumbnail
+                        })
                     }
                 }
             }

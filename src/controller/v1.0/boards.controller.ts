@@ -1,58 +1,71 @@
 import Joi, { Schema, ValidationResult } from "joi"
 import { Context } from "koa"
 import Board, { IBoardDocument } from "../../database/models/Board"
-import PreviewBoard, {
-    IPreviewBoardDocument
-} from "../../database/models/PreviewBoard"
 import Website, { IWebsiteDocument } from "../../database/models/Website"
 import {
-    ReadBoardResponse,
+    ListBoardPreview,
+    ListBoardResponse,
     UpdateBoardResponse,
     WriteBoardResponse
 } from "../../types/types"
 
 /*
-    [GET] /v1.0/boards/
+    [GET] /v1.0/boards
 */
 export const listBoard = async (ctx: Context) => {
-    // 사용자 많아지면 도입
-}
+    let result: ListBoardResponse
+    const page = parseInt(ctx.query.page || 1, 10)
+    const keyword: string = ctx.query.keyword
+    const category: string = ctx.query.category
+    const websiteId: string = ctx.query.websiteId
 
-/*
-    [GET] /v1.0/boards/:id
-*/
-export const readBoard = async (ctx: Context) => {
-    let result: ReadBoardResponse
-    const { id } = ctx.params
+    let query = {}
+    const baseQuery = { private: false }
+
+    query = websiteId
+        ? { ...baseQuery, websiteId }
+        : keyword
+        ? {
+              ...baseQuery,
+              name: {
+                  $regex: keyword,
+                  $options: "i"
+              }
+          }
+        : category
+        ? {
+              ...baseQuery,
+              category
+          }
+        : { ...baseQuery }
+
+    if (page < 1) {
+        result = {
+            ok: false,
+            error: "Page must have more than 1",
+            boards: null
+        }
+
+        ctx.status = 400
+        ctx.body = result
+        return
+    }
 
     try {
-        const board: IBoardDocument | null = await Board.findById(id, {
-            cards: true
-        })
+        const boards: IBoardDocument[] = await Board.findList(query, page)
 
-        if (board) {
-            result = {
-                ok: true,
-                error: null,
-                board
-            }
-
-            ctx.body = result
-        } else {
-            result = {
-                ok: false,
-                error: "Board does not found.",
-                board: null
-            }
-
-            ctx.status = 404
-            ctx.body = result
+        result = {
+            ok: true,
+            error: null,
+            boards
         }
+
+        ctx.body = result
     } catch (error) {
         result = {
             ok: false,
             error: error.message,
-            board: null
+            boards: null
         }
 
         ctx.status = 500
@@ -61,9 +74,42 @@ export const readBoard = async (ctx: Context) => {
 }
 
 /*
-    [POST] /v1.0/boards/
+    [GET] /v1.0/boards/search/preview
 */
-export const writeBoard = async (ctx: Context) => {
+export const listPreview = async (ctx: Context) => {
+    let result: ListBoardPreview
+    const keyword: string = ctx.query.keyword
+
+    const query = { private: false, name: { $regex: keyword, $options: "i" } }
+
+    try {
+        const boards: IBoardDocument[] = await Board.findSearchPreviewList(
+            query
+        )
+
+        result = {
+            ok: true,
+            error: null,
+            boards
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            boards: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+/*
+    [POST] /v1.0/boards
+*/
+export const wrtieBoard = async (ctx: Context) => {
     let result: WriteBoardResponse
     const { body } = ctx.request
 
@@ -101,7 +147,7 @@ export const writeBoard = async (ctx: Context) => {
         )
 
         if (website) {
-            const board: IBoardDocument | null = await new Board({
+            await new Board({
                 name,
                 link,
                 category,
@@ -111,30 +157,12 @@ export const writeBoard = async (ctx: Context) => {
                 websiteThumbnail: website.thumbnail
             }).save()
 
-            if (board) {
-                await new PreviewBoard({
-                    board: board._id,
-                    name,
-                    link,
-                    category,
-                    layoutType,
-                    websiteId,
-                    websiteName: website.name,
-                    websiteThumbnail: website.thumbnail
-                }).save()
-
-                result = {
-                    ok: true,
-                    error: null
-                }
-
-                ctx.body = result
-            } else {
-                result = {
-                    ok: false,
-                    error: "Write board failed. Board does not found."
-                }
+            result = {
+                ok: true,
+                error: null
             }
+
+            ctx.body = result
         } else {
             result = {
                 ok: false,
@@ -164,35 +192,10 @@ export const updateBoard = async (ctx: Context) => {
     const { id } = ctx.params
     const { body } = ctx.request
 
-    let previewBoard: IPreviewBoardDocument | null = null
     let board: IBoardDocument | null = null
 
     try {
-        previewBoard = await PreviewBoard.findById(id)
-    } catch (error) {
-        result = {
-            ok: false,
-            error: error.message
-        }
-
-        ctx.status = 500
-        ctx.body = result
-        return
-    }
-
-    if (!previewBoard) {
-        result = {
-            ok: false,
-            error: "PreviewBoard does not found."
-        }
-
-        ctx.status = 404
-        ctx.body = result
-        return
-    }
-
-    try {
-        board = await Board.findById(previewBoard.board)
+        board = await Board.findById(id)
     } catch (error) {
         result = {
             ok: false,
@@ -207,7 +210,7 @@ export const updateBoard = async (ctx: Context) => {
     if (!board) {
         result = {
             ok: false,
-            error: "Board does not found."
+            error: "Previewboard does not found."
         }
 
         ctx.status = 404
@@ -220,10 +223,12 @@ export const updateBoard = async (ctx: Context) => {
         link: true,
         category: true,
         layoutType: true,
-        websiteId: true
+        websiteId: true,
+        score: true,
+        private: true
     }
 
-    const schema: Schema = Joi.object({
+    const schema: Schema = Joi.object().keys({
         name: Joi.string()
             .min(1)
             .max(50),
@@ -232,8 +237,9 @@ export const updateBoard = async (ctx: Context) => {
         layoutType: Joi.string().regex(
             /^NEWS_PHOTO|SHOP_PHOTO|MOVIE_CHART|MUSIC_CHART|OLD_BOARD$/
         ),
-        private: Joi.boolean(),
-        websiteId: Joi.string()
+        websiteId: Joi.string(),
+        score: Joi.number().min(0),
+        private: Joi.boolean()
     })
 
     const validation: ValidationResult<any> = Joi.validate(body, schema)
@@ -264,6 +270,7 @@ export const updateBoard = async (ctx: Context) => {
 
     try {
         const { websiteId } = body
+
         if (websiteId) {
             const website: IWebsiteDocument | null = await Website.findById(
                 websiteId
@@ -283,20 +290,14 @@ export const updateBoard = async (ctx: Context) => {
                 return
             }
         }
-        const boardPatchData = {
+
+        const patchData = {
             ...board.toObject(),
             ...body,
             updatedAt: Date.now()
         }
 
-        const previewBoardPatchData = {
-            ...previewBoard.toObject(),
-            ...body,
-            updatedAt: Date.now()
-        }
-
-        await board.update({ ...boardPatchData })
-        await previewBoard.update({ ...previewBoardPatchData })
+        await board.update({ ...patchData })
 
         result = {
             ok: true,
