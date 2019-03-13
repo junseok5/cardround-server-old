@@ -5,6 +5,11 @@ import userAuthentication from "../../middlewares/user.authentication"
 const router: Router = new Router()
 
 router.get("/users/following", userAuthentication, usersCtrl.listFollowBoard)
+router.get(
+    "/users/following/preview",
+    userAuthentication,
+    usersCtrl.listPreviewFollowBoard
+)
 router.post(
     "/users/following/:boardId",
     userAuthentication,

@@ -12,6 +12,9 @@ export interface IFollowBoardModel extends Model<IFollowBoardDocument> {
         query: { user: Schema.Types.ObjectId },
         page: number
     ) => IFollowBoardDocument[]
+    findPreviewList: (query: {
+        user: Schema.Types.ObjectId
+    }) => IFollowBoardDocument[]
 }
 
 const FollowBoardSchema: Schema = new Schema({
@@ -47,6 +50,12 @@ FollowBoardSchema.statics.findList = function(query, page) {
             select: "name link layoutType cards websiteThumbnail websiteName"
         })
         .lean()
+}
+
+FollowBoardSchema.statics.findPreviewList = function(query, page) {
+    return this.find(query, {
+        board: true
+    }).lean()
 }
 
 export default model<IFollowBoardDocument, IFollowBoardModel>(

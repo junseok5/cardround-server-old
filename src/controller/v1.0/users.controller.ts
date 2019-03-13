@@ -13,6 +13,7 @@ import {
     FollowBoardResponse,
     GetUserInfoResponse,
     ListFollowBoardResponse,
+    ListPreviewFollowBoard,
     UnfollowBoardResponse
 } from "../../types/types"
 
@@ -125,7 +126,7 @@ export const listFollowBoard = async (ctx: Context) => {
         result = {
             ok: true,
             error: null,
-            followBoards: following
+            followingBoards: following
         }
 
         ctx.body = result
@@ -133,7 +134,39 @@ export const listFollowBoard = async (ctx: Context) => {
         result = {
             ok: false,
             error: error.message,
-            followBoards: null
+            followingBoards: null
+        }
+
+        ctx.status = 500
+        ctx.body = result
+        return
+    }
+}
+
+/*
+    [GET] /v1.0/users/following/preview
+*/
+export const listPreviewFollowBoard = async (ctx: Context) => {
+    let result: ListPreviewFollowBoard
+    const userId: Schema.Types.ObjectId = ctx.user._id
+
+    try {
+        const following: IFollowBoardDocument[] = await FollowBoard.findPreviewList(
+            { user: userId }
+        )
+
+        result = {
+            ok: true,
+            error: null,
+            followingBoards: following
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message,
+            followingBoards: null
         }
 
         ctx.status = 500
@@ -161,7 +194,8 @@ export const followBoard = async (ctx: Context) => {
         if (following) {
             result = {
                 ok: true,
-                error: null
+                error: null,
+                board: boardId
             }
 
             ctx.body = result
@@ -175,14 +209,16 @@ export const followBoard = async (ctx: Context) => {
 
         result = {
             ok: true,
-            error: null
+            error: null,
+            board: boardId
         }
 
         ctx.body = result
     } catch (error) {
         result = {
             ok: false,
-            error: error.message
+            error: error.message,
+            board: boardId
         }
 
         ctx.status = 500
@@ -257,7 +293,8 @@ export const unfollowBoard = async (ctx: Context) => {
         if (!following) {
             result = {
                 ok: true,
-                error: null
+                error: null,
+                board: boardId
             }
 
             ctx.body = result
@@ -268,14 +305,16 @@ export const unfollowBoard = async (ctx: Context) => {
 
         result = {
             ok: true,
-            error: null
+            error: null,
+            board: boardId
         }
 
         ctx.body = result
     } catch (error) {
         result = {
             ok: false,
-            error: error.message
+            error: error.message,
+            board: boardId
         }
 
         ctx.status = 500

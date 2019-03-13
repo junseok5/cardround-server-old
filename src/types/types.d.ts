@@ -84,17 +84,19 @@ export interface UpdateBoardResponse {
 export interface FollowBoardResponse {
     ok: boolean
     error: error | null
+    board: Schema.Types.ObjectId
 }
 
 export interface UnfollowBoardResponse {
     ok: boolean
     error: error | null
+    board: Schema.Types.ObjectId
 }
 
 export interface ListFollowBoardResponse {
     ok: boolean
     error: error | null
-    followBoards: IFollowBoardDocument[] | null
+    followingBoards: IFollowBoardDocument[] | null
 }
 
 export interface ListBoardResponse {
@@ -129,4 +131,10 @@ export interface ListWebsitePreview {
     ok: boolean
     error: error | null
     websites: IWebsiteDocument[] | null
+}
+
+export interface ListPreviewFollowBoard {
+    ok: boolean
+    error: error | null
+    followingBoards: IFollowBoardDocument[] | null
 }

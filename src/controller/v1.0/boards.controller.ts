@@ -19,6 +19,18 @@ export const listBoard = async (ctx: Context) => {
     const category: string = ctx.query.category
     const websiteId: string = ctx.query.websiteId
 
+    if (page < 1) {
+        result = {
+            ok: false,
+            error: "Page must have more than 1",
+            boards: null
+        }
+
+        ctx.status = 400
+        ctx.body = result
+        return
+    }
+
     let query = {}
     const baseQuery = { private: false }
 
@@ -38,18 +50,6 @@ export const listBoard = async (ctx: Context) => {
               category
           }
         : { ...baseQuery }
-
-    if (page < 1) {
-        result = {
-            ok: false,
-            error: "Page must have more than 1",
-            boards: null
-        }
-
-        ctx.status = 400
-        ctx.body = result
-        return
-    }
 
     try {
         const boards: IBoardDocument[] = await Board.findList(query, page)
