@@ -1,12 +1,12 @@
 import { Context } from "koa"
 import { Schema } from "mongoose"
 import Board, { IBoardDocument } from "../../database/models/Board"
-import FollowBoard, {
-    IFollowBoardDocument
-} from "../../database/models/FollowBoard"
-import FollowWebsite, {
-    IFollowWebsiteDocument
-} from "../../database/models/FollowWebsite"
+import FollowingBoard, {
+    IFollowingBoardDocument
+} from "../../database/models/FollowingBoard"
+import FollowingWebsite, {
+    IFollowingWebsiteDocument
+} from "../../database/models/FollowingWebsite"
 import User, { IUserDocument } from "../../database/models/User"
 import Website from "../../database/models/Website"
 import {
@@ -14,7 +14,8 @@ import {
     GetUserInfoResponse,
     ListFollowBoardResponse,
     ListPreviewFollowBoard,
-    UnfollowBoardResponse
+    UnfollowBoardResponse,
+    UpdateScore
 } from "../../types/types"
 
 /*
@@ -116,7 +117,7 @@ export const listFollowBoard = async (ctx: Context) => {
     const userId: Schema.Types.ObjectId = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument[] = await FollowBoard.findList(
+        const following: IFollowingBoardDocument[] = await FollowingBoard.findList(
             {
                 user: userId
             },
@@ -151,7 +152,7 @@ export const listPreviewFollowBoard = async (ctx: Context) => {
     const userId: Schema.Types.ObjectId = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument[] = await FollowBoard.findPreviewList(
+        const following: IFollowingBoardDocument[] = await FollowingBoard.findPreviewList(
             { user: userId }
         )
 
@@ -184,7 +185,7 @@ export const followBoard = async (ctx: Context) => {
     const userId: string = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument | null = await FollowBoard.findOne(
+        const following: IFollowingBoardDocument | null = await FollowingBoard.findOne(
             {
                 user: userId,
                 board: boardId
@@ -202,7 +203,7 @@ export const followBoard = async (ctx: Context) => {
             return
         }
 
-        await new FollowBoard({
+        await new FollowingBoard({
             user: userId,
             board: boardId
         }).save()
@@ -227,7 +228,7 @@ export const followBoard = async (ctx: Context) => {
     }
 
     try {
-        const followerCount: number = await FollowBoard.countDocuments({
+        const followerCount: number = await FollowingBoard.countDocuments({
             board: boardId
         })
 
@@ -245,7 +246,7 @@ export const followBoard = async (ctx: Context) => {
 
             // 웹사이트 팔로우 & 웹사이트 팔로우 수 업데이트
             const { websiteId } = board
-            const followWebsite: IFollowWebsiteDocument | null = await FollowWebsite.findOne(
+            const followWebsite: IFollowingWebsiteDocument | null = await FollowingWebsite.findOne(
                 {
                     user: userId,
                     website: websiteId
@@ -253,12 +254,12 @@ export const followBoard = async (ctx: Context) => {
             )
 
             if (!followWebsite) {
-                await new FollowWebsite({
+                await new FollowingWebsite({
                     user: userId,
                     website: websiteId
                 }).save()
 
-                const followWebsiteCount: number = await FollowWebsite.countDocuments(
+                const followWebsiteCount: number = await FollowingWebsite.countDocuments(
                     {
                         website: websiteId
                     }
@@ -283,7 +284,7 @@ export const unfollowBoard = async (ctx: Context) => {
     const userId: string = ctx.user._id
 
     try {
-        const following: IFollowBoardDocument | null = await FollowBoard.findOne(
+        const following: IFollowingBoardDocument | null = await FollowingBoard.findOne(
             {
                 user: userId,
                 board: boardId
@@ -323,7 +324,7 @@ export const unfollowBoard = async (ctx: Context) => {
     }
 
     try {
-        const followerCount: number = await FollowBoard.countDocuments({
+        const followerCount: number = await FollowingBoard.countDocuments({
             board: boardId
         })
 
@@ -345,7 +346,7 @@ export const unfollowBoard = async (ctx: Context) => {
                 websiteId
             })
 
-            const followingBoards: IFollowBoardDocument[] = await FollowBoard.find(
+            const followingBoards: IFollowingBoardDocument[] = await FollowingBoard.find(
                 {
                     user: userId
                 }
@@ -364,12 +365,12 @@ export const unfollowBoard = async (ctx: Context) => {
                 }
             }
 
-            await FollowWebsite.deleteOne({
+            await FollowingWebsite.deleteOne({
                 user: userId,
                 website: websiteId
             })
 
-            const websiteCount: number = await FollowWebsite.countDocuments({
+            const websiteCount: number = await FollowingWebsite.countDocuments({
                 website: websiteId
             })
 
@@ -379,5 +380,40 @@ export const unfollowBoard = async (ctx: Context) => {
         }
     } catch (error) {
         throw new Error(error)
+    }
+}
+
+/*
+    [PATCH] /v1.0/users/following/:boardId/score
+*/
+export const updateFollowingBoardScore = async (ctx: Context) => {
+    let result: UpdateScore
+    const { boardId } = ctx.params
+    const userId: string = ctx.user._id
+
+    try {
+        const followingBoard: IFollowingBoardDocument | null = await FollowingBoard.findOne(
+            { board: boardId, user: userId }
+        )
+
+        if (followingBoard) {
+            followingBoard.score++
+            followingBoard.save()
+        }
+
+        result = {
+            ok: true,
+            error: null
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message
+        }
+
+        ctx.status = 500
+        ctx.body = result
     }
 }

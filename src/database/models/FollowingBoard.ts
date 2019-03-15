@@ -1,23 +1,23 @@
 import { Document, model, Model, Schema } from "mongoose"
 
-export interface IFollowBoardDocument extends Document {
+export interface IFollowingBoardDocument extends Document {
     _id: Schema.Types.ObjectId
     user: Schema.Types.ObjectId
     board: Schema.Types.ObjectId
     score: number
 }
 
-export interface IFollowBoardModel extends Model<IFollowBoardDocument> {
+export interface IFollowingBoardModel extends Model<IFollowingBoardDocument> {
     findList: (
         query: { user: Schema.Types.ObjectId },
         page: number
-    ) => IFollowBoardDocument[]
+    ) => IFollowingBoardDocument[]
     findPreviewList: (query: {
         user: Schema.Types.ObjectId
-    }) => IFollowBoardDocument[]
+    }) => IFollowingBoardDocument[]
 }
 
-const FollowBoardSchema: Schema = new Schema({
+const FollowingBoardSchema: Schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -37,7 +37,7 @@ const FollowBoardSchema: Schema = new Schema({
 
 const NumPerPage = 20
 
-FollowBoardSchema.statics.findList = function(query, page) {
+FollowingBoardSchema.statics.findList = function(query, page) {
     return this.find(query, {
         user: false
     })
@@ -47,18 +47,18 @@ FollowBoardSchema.statics.findList = function(query, page) {
         .populate({
             path: "board",
             model: "Board",
-            select: "name link layoutType cards websiteThumbnail websiteName"
+            select: "name link layoutType cards websiteThumbnail"
         })
         .lean()
 }
 
-FollowBoardSchema.statics.findPreviewList = function(query, page) {
+FollowingBoardSchema.statics.findPreviewList = function(query) {
     return this.find(query, {
         board: true
     }).lean()
 }
 
-export default model<IFollowBoardDocument, IFollowBoardModel>(
-    "FollowBoard",
-    FollowBoardSchema
+export default model<IFollowingBoardDocument, IFollowingBoardModel>(
+    "FollowingBoard",
+    FollowingBoardSchema
 )

@@ -6,6 +6,7 @@ import {
     ListBoardPreview,
     ListBoardResponse,
     UpdateBoardResponse,
+    UpdateScore,
     WriteBoardResponse
 } from "../../types/types"
 
@@ -298,6 +299,38 @@ export const updateBoard = async (ctx: Context) => {
         }
 
         await board.update({ ...patchData })
+
+        result = {
+            ok: true,
+            error: null
+        }
+
+        ctx.body = result
+    } catch (error) {
+        result = {
+            ok: false,
+            error: error.message
+        }
+
+        ctx.status = 500
+        ctx.body = result
+    }
+}
+
+/*
+    [PATCH] /v1.0/boards/:id/score
+*/
+export const updateBoardScore = async (ctx: Context) => {
+    let result: UpdateScore
+    const { id } = ctx.params
+
+    try {
+        const board: IBoardDocument | null = await Board.findById(id)
+
+        if (board) {
+            board.score++
+            board.save()
+        }
 
         result = {
             ok: true,

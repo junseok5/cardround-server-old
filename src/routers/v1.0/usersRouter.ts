@@ -20,6 +20,11 @@ router.delete(
     userAuthentication,
     usersCtrl.unfollowBoard
 )
+router.patch(
+    "/users/following/:boardId/score",
+    userAuthentication,
+    usersCtrl.updateFollowingBoardScore
+)
 router.get("/users", userAuthentication, usersCtrl.getMyInfo)
 router.get("/users/:id", usersCtrl.getUserInfo)
 
