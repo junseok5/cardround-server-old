@@ -71,12 +71,7 @@ export const getUserInfo = async (ctx: Context) => {
     const { id } = ctx.params
 
     try {
-        const user: IUserDocument | null = await User.findById(id, {
-            social: false,
-            password: false,
-            createdAt: false,
-            updatedAt: false
-        })
+        const user: IUserDocument | null = await User.getProfile(id)
 
         if (user) {
             result = {

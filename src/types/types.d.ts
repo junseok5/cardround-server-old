@@ -1,6 +1,6 @@
 import { IWebsiteDocument } from "../database/models/Website"
 import { IUserDocument } from "../database/models/User"
-import { IFollowBoardDocument } from "../database/models/FollowingBoard"
+import { IFollowBoardDocument, IFollowingBoardDocument } from "../database/models/FollowingBoard"
 import { IBoardDocument } from "../database/models/Board"
 import { Schema } from "mongoose"
 import { ICategoryDocument } from "../database/models/Category"
@@ -142,4 +142,15 @@ export interface ListPreviewFollowBoard {
 export interface UpdateScore {
     ok: boolean
     error: error | null
+}
+
+export interface GetInitialData {
+    ok: boolean
+    error: error | null
+    followingPreviewBoards?: IFollowingBoardDocument[] | null
+    boardCategories?: ICategoryDocument[] | null
+    boards?: IBoardDocument[] | null
+    websiteCategories?: ICategoryDocument[] | null
+    websites?: IWebsiteDocument[] | null
+    profile?: IUserDocument | null
 }

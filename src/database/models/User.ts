@@ -40,6 +40,7 @@ export interface IUserModel extends Model<IUserDocument> {
         accessToken: string
         profileId: string
     }) => IUserDocument
+    getProfile: (id: Schema.Types.ObjectId) => IUserDocument | null
 }
 
 const UserSchema: Schema = new Schema({
@@ -110,6 +111,15 @@ UserSchema.statics.socialRegister = function({
     })
 
     return user.save()
+}
+
+UserSchema.statics.getProfile = function(id) {
+    return this.findById(id, {
+        social: false,
+        password: false,
+        createdAt: false,
+        updatedAt: false
+    })
 }
 
 UserSchema.methods.validatePassword = function(password: string) {
